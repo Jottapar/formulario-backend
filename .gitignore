@@ -1,0 +1,30 @@
+# --- Secretos y entorno ---
+.env
+*.env
+!.env.example
+
+# --- Entorno virtual de Python ---
+venv/
+.venv/
+env/
+
+# --- Cache de Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# --- Herramientas y editores ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# --- Pytest / cobertura (para más adelante) ---
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Logs y bases de datos locales sueltas ---
+*.log
+*.sqlite3
