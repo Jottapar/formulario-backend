@@ -1,7 +1,8 @@
 from sqlmodel import SQLModel, Session, create_engine
 
 from app.core.config import settings
-
+import app.models
+ 
 
 # 1. El ENGINE: la fábrica de conexiones. Se crea UNA sola vez.
 engine = create_engine(
