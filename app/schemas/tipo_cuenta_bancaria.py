@@ -10,4 +10,4 @@ class TipoCuentaRead(SQLModel):
     id: int
     nombre: str
     created_at: datetime
-    updated_at: datetimess
+    updated_at: datetime

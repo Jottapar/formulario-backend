@@ -15,8 +15,8 @@ class DatoBancarioRead(SQLModel):
     num_cuenta: str
     banco: BancoRead
     tipo_cuenta: TipoCuentaRead
-    created_at: datetime | None
-    updated_at: datetime | None
+    created_at: datetime 
+    updated_at: datetime
 
 
 

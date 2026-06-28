@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 from app.models.tipo_cuenta_bancaria import TipoCuentaBancaria
 from app.schemas.tipo_cuenta_bancaria import TipoCuentaCreate
-
+from datetime import datetime
 
 def crear(session: Session, data: TipoCuentaCreate) -> TipoCuentaBancaria:
     tipo = TipoCuentaBancaria(nombre=data.nombre)
@@ -24,6 +24,7 @@ def actualizar(session: Session, tipo_id: int, data: TipoCuentaCreate) -> TipoCu
     if not tipo:
         return None
     tipo.nombre = data.nombre
+    tipo.updated_at = datetime.now()
     session.add(tipo)
     session.commit()
     session.refresh(tipo)
