@@ -11,8 +11,8 @@ class TipoCuentaBancaria(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     nombre: str = Field(max_length=50)
-    created_at: datetime | None = Field(default_factory=datetime.now)
-    updated_at: datetime | None = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
 
 
     datos_bancarios: list["DatoBancario"] = Relationship(back_populates="tipo_cuenta")
