@@ -14,7 +14,7 @@ def create(datos:ArchivoCreate, session: Session = Depends(get_session)):
 @router.get("/", response_model=list[ArchivoRead])
 def get_all(session: Session = Depends(get_session)):
     return services.get_all(session)
-
+ 
 @router.get("/{id}", response_model=ArchivoRead)
 def get_by_id(id: int, session:Session = Depends(get_session)):
     archivo = services.get_by_id(id, session)
