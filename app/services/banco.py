@@ -7,14 +7,8 @@ from app.schemas.banco import BancoCreate
 def crear_banco(session: Session, datos: BancoCreate) -> Banco:
     # 1. Convertir el schema de entrada en un objeto de la tabla
     banco = Banco(nombre=datos.nombre)
-
-    # 2. Agregar a la sesión (todavía NO está en la base)
     session.add(banco)
-
-    # 3. Confirmar: AHORA sí se escribe en Postgres
     session.commit()
-
-    # 4. Refrescar para traer lo que la base generó (id, created_at)
     session.refresh(banco)
 
     return banco

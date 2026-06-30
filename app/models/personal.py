@@ -53,5 +53,5 @@ class Personal(SQLModel, table=True):
     eps: "Eps" = Relationship(back_populates="personal")
     alimentacion: "Alimentacion" = Relationship(back_populates="personal")
     status_personal: "StatusPersonal" = Relationship(back_populates="personal")
-    archivos_personal: list[ArchivosPersonal] = Relationship(back_populates="Personal")
+    archivos_personal: list[ArchivosPersonal] = Relationship(back_populates="personal")
 
