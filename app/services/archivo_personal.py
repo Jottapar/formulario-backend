@@ -1,6 +1,9 @@
 from sqlmodel import Session, select
 from datetime import datetime
 
+from sqlalchemy.exc import IntegrityError
+from app.utils.exceptions import NotFoundError, ConflictError
+
 from app.models.archivos_personal import ArchivosPersonal
 from app.models.archivos import Archivos
 from app.models.personal import Personal
@@ -12,10 +15,10 @@ def create(datos:ArchivoPersonalCreate, session:Session)-> ArchivosPersonal:
     persona = session.get(Personal, datos.personal_id)
 
     if not archivo:
-        raise ValueError(f'El archivo con id {datos.archivos_id} no existe')
+        raise NotFoundError(f'El archivo con id {datos.archivos_id} no existe')
     
     if not persona:
-        raise ValueError(f'La persona con id {datos.personal_id} no existe')
+        raise NotFoundError(f'La persona con id {datos.personal_id} no existe')
     
     new_record = ArchivosPersonal(
         personal_id=datos.personal_id,
@@ -24,16 +27,25 @@ def create(datos:ArchivoPersonalCreate, session:Session)-> ArchivosPersonal:
     )
     
     session.add(new_record)
-    session.commit()
+
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        raise ConflictError("Esta persona ya tiene un archivo de este tipo")
+
     session.refresh(new_record)
     return new_record
+
+
+
 
 def get_all(session: Session)-> list[ArchivosPersonal]:
     registros=select(ArchivosPersonal)
     resultado= session.exec(registros).all()
     return resultado
 
-def get_by_personal_id(id:int, session:Session) -> ArchivosPersonal:
+def get_by_personal_id(id:int, session:Session) -> list[ArchivosPersonal]:
     registros= select(ArchivosPersonal).where(ArchivosPersonal.personal_id == id)
     resultado= session.exec(registros).all()
     return resultado
@@ -42,7 +54,7 @@ def update_url(id:int, datos:ArchivoPersonalUpdate, session:Session) -> Archivos
     registro = session.get(ArchivosPersonal,id)
 
     if registro  is None:
-        return None
+        raise NotFoundError(f"Archivo personal con id {id} no existe")
     
     datos_registro = datos.model_dump(exclude_unset=True)   
     for campo, valor in datos_registro.items():

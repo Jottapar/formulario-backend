@@ -1,5 +1,7 @@
 from sqlmodel import Session, select
 
+from app.utils.exceptions import NotFoundError, ConflictError
+
 from app.models.dato_bancario import DatoBancario
 from app.models.banco import Banco
 from app.models.tipo_cuenta_bancaria import TipoCuentaBancaria
@@ -11,11 +13,11 @@ def crear(session: Session, data: DatoBancarioCreate) -> DatoBancario:
     # Antes de insertar, confirmo que las dos FK apunten a algo real.
     banco = session.get(Banco, data.banco_id)
     if not banco:
-        raise ValueError(f"El banco con id {data.banco_id} no existe")
+        raise NotFoundError(f"El banco con id {data.banco_id} no existe")
 
     tipo = session.get(TipoCuentaBancaria, data.tipo_cuenta_id)
     if not tipo:
-        raise ValueError(f"El tipo de cuenta con id {data.tipo_cuenta_id} no existe")
+        raise NotFoundError(f"El tipo de cuenta con id {data.tipo_cuenta_id} no existe")
 
     # Si llegué aquí, las dos FK son válidas → inserto con seguridad.
     cuenta = DatoBancario(

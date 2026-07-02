@@ -2,8 +2,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.core.config import settings
 from app.db.session import init_db
-from app.models.banco import Banco  # importar para que SQLModel lo registre
+
 from app.api.hub import api_hub
+from app.utils.handlers import not_found_handler, conflict_handler, business_error_handler
+from app.utils.exceptions import NotFoundError, ConflictError, BusinessError
+
 
 
 @asynccontextmanager
@@ -22,7 +25,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+
+app.add_exception_handler(NotFoundError, not_found_handler)
+app.add_exception_handler(ConflictError, conflict_handler)
+app.add_exception_handler(BusinessError, business_error_handler)
+
 app.include_router(api_hub)
+
+
 
 @app.get("/")
 def raiz():
