@@ -44,4 +44,5 @@ def delete(id: int, session:Session)-> bool:
         return False
     
     session.delete(status)
+    session.commit()
     return True

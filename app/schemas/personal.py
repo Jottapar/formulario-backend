@@ -36,7 +36,7 @@ class PersonalCreate(SQLModel):
     ciudad_id: int
     eps_id: int
     status_personal_id: int
-    archivos_personal_id: int
+    
 
 class PersonalRead(SQLModel):
     id: int
@@ -70,3 +70,32 @@ class PersonalRead(SQLModel):
     datos_bancarios: list[DatoBancarioRead]
 
 
+class PersonalUpdate(SQLModel):
+    tipo_doc: str | None = Field(default=None, max_length=3)  
+    num_doc: str | None = Field(default=None,max_length=10)
+    primer_nombre: str | None = None
+    segundo_nombre: str | None = None
+    primer_apellido: str | None = None
+    segundo_apelido: str | None = None
+    telefono: str | None = None
+    fecha_nacimiento: date | None = None
+    correo: EmailStr | None = None
+    direccion: str | None = Field(default=None,max_length=100)
+    nombre_emergencia: str | None = Field(default=None,max_length=100)
+    telefono_emergencia: str | None = Field(default=None,max_length=13)
+    estatura: int | None = None
+    talla_camiseta: str | None = None
+    talla_pantalon: str | None = None
+    talla_zapatos: str | None = None
+    alergias: str | None = None
+    nivel_ingles: str | None = None
+    
+
+    genero_id: int | None = None
+    alimentacion_id: int | None = None
+    ciudad_id: int | None = None
+    eps_id: int | None = None
+    status_personal_id: int | None = None
+
+
+    

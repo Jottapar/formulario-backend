@@ -11,9 +11,13 @@ class ArchivoPersonalCreate(SQLModel):
 
 class ArchivoPersonalRead(SQLModel):
     id: int
-    personal_id: PersonalRead
-    archivos_id: ArchivoRead
+    personal: PersonalRead
+    archivos: ArchivoRead
     url: str
     created_at: datetime
     updated_at: datetime
 
+    
+
+class ArchivoPersonalUpdate(SQLModel):
+    url: str | None = None

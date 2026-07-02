@@ -39,4 +39,5 @@ def delete(id:int, session:Session) -> bool:
         return False
     
     session.delete(ciudad)
-    return ciudad
+    session.commit()
+    return True

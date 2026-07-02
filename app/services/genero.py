@@ -40,4 +40,5 @@ def delete(id: int, session:Session):
         return None
     
     session.delete(genero)
+    session.commit()
     return True

@@ -40,4 +40,5 @@ def delete(id: int, session:Session)->bool:
         return False
     
     session.delete(eps)
+    session.commit()
     return True

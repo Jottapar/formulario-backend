@@ -39,4 +39,3 @@ def delete(id:int, session: Session = Depends(get_session)):
     if not ciudad:
         raise HTTPException(status_code=404, detail='Ciudad no encontrada')
     
-    session.delete(ciudad)
