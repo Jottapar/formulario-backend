@@ -1,8 +1,12 @@
 from sqlmodel import Session, select
 from datetime import datetime
+import logging
 
 from app.schemas.archivo import ArchivoCreate, ArchivoRead
 from app.models.archivos import Archivos
+
+
+logger = logging.getLogger(__name__)
 
 
 def create(session: Session, datos:ArchivoCreate) -> ArchivoCreate:
@@ -10,6 +14,7 @@ def create(session: Session, datos:ArchivoCreate) -> ArchivoCreate:
     session.add(archivo)
     session.commit()
     session.refresh(archivo)
+    logger.info(f'logger.info(f"ArchivoPersonal creado con id {archivo.id}") ')
     return archivo
 
 def get_all(session: Session)-> ArchivoRead:

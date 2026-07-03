@@ -1,5 +1,6 @@
 from sqlmodel import Session, select
 from datetime import datetime
+import logging
 
 from sqlalchemy.exc import IntegrityError
 from app.utils.exceptions import NotFoundError, ConflictError
@@ -8,6 +9,9 @@ from app.models.archivos_personal import ArchivosPersonal
 from app.models.archivos import Archivos
 from app.models.personal import Personal
 from app.schemas.archivo_personal import ArchivoPersonalCreate, ArchivoPersonalRead,ArchivoPersonalUpdate
+
+
+logger = logging.getLogger(__name__)
 
 
 def create(datos:ArchivoPersonalCreate, session:Session)-> ArchivosPersonal:
@@ -35,6 +39,7 @@ def create(datos:ArchivoPersonalCreate, session:Session)-> ArchivosPersonal:
         raise ConflictError("Esta persona ya tiene un archivo de este tipo")
 
     session.refresh(new_record)
+    logger.info(f"ArchivoPersonal creado con id {new_record.id}")   # evento normal
     return new_record
 
 
