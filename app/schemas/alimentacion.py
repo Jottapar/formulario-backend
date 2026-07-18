@@ -1,8 +1,11 @@
 from datetime import datetime
 from sqlmodel import SQLModel
 
-class AlimentacionCreate(SQLModel):
-    nombre: str 
+class AlimentacionBase(SQLModel):
+    nombre: str
+
+class AlimentacionCreate(AlimentacionBase):
+    pass 
 
 class AlimentacionRead(SQLModel):
     id: int

@@ -10,12 +10,6 @@ engine = create_engine(
     echo=True,  # imprime el SQL que ejecuta (útil para aprender)
 )
 
-
-# 2. Crea las tablas a partir de los models. Se llama al arrancar la app.
-def init_db() -> None:
-    SQLModel.metadata.create_all(engine)
-
-
 # 3. La DEPENDENCY: presta una session por petición y la cierra sola.
 def get_session():
     with Session(engine) as session:

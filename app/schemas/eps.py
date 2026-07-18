@@ -1,8 +1,12 @@
 from datetime import datetime
 from sqlmodel import SQLModel
 
-class EpsCreate(SQLModel):
+
+class EpsBase(SQLModel):
     nombre: str
+
+class EpsCreate(EpsBase):
+    pass
 
 class EpsRead(SQLModel):
     id: int

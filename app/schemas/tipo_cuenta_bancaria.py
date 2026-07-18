@@ -2,8 +2,11 @@ from datetime import datetime
 from sqlmodel import SQLModel
 
 
-class TipoCuentaCreate(SQLModel):
+class TipoCuentaBase(SQLModel):
     nombre: str
+
+class TipoCuentaCreate(TipoCuentaBase):
+    pass
 
 
 class TipoCuentaRead(SQLModel):

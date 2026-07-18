@@ -8,8 +8,11 @@ from .archivos import Archivos
 from .archivos_personal import ArchivosPersonal
 from .ciudad import Ciudad
 from .personal import Personal
-from.status_personal import StatusPersonal
+from .status_personal import StatusPersonal
+from .usuario import Usuario
+from .rol import Rol
+
 
 __all__ = ["Banco", "TipoCuentaBancaria", "DatoBancario", "Genero", "Eps", "Alimentacion", 
-           "Archivos", "ArchivosPersonal","Ciudad", "Personal", "StatusPersonal"
+           "Archivos", "ArchivosPersonal","Ciudad", "Personal", "StatusPersonal", 'Usuario', 'Rol'
            ]

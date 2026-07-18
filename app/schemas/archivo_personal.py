@@ -4,10 +4,13 @@ from sqlmodel import SQLModel
 from app.schemas.personal import PersonalRead
 from app.schemas.archivo import ArchivoRead
 
-class ArchivoPersonalCreate(SQLModel):
+class ArchivoPersonalBase(SQLModel):
     personal_id: int
     archivos_id: int
     url: str
+
+class ArchivoPersonalCreate(ArchivoPersonalBase):
+    pass
 
 class ArchivoPersonalRead(SQLModel):
     id: int

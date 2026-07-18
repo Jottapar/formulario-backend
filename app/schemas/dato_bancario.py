@@ -4,11 +4,13 @@ from sqlmodel import SQLModel
 from app.schemas.banco import BancoRead
 from app.schemas.tipo_cuenta_bancaria import TipoCuentaRead
 
-class DatoBancarioCreate(SQLModel):
+class DatoBancarioBase(SQLModel):
     num_cuenta: str
     banco_id: int
     tipo_cuenta_id: int
 
+class DatoBancarioCreate(DatoBancarioBase):
+    pass
 
 class DatoBancarioRead(SQLModel):
     id: int

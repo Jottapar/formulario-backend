@@ -1,8 +1,11 @@
 from datetime import datetime
 from sqlmodel import SQLModel
 
-class BancoCreate(SQLModel):
+class BancoBase(SQLModel):
     nombre: str
+
+class BancoCreate(BancoBase):
+    pass
 
 class BancoRead(SQLModel):
     id: int

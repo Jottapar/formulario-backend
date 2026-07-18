@@ -10,7 +10,7 @@ from .status_personal import StatusPersonalRead
 from .dato_bancario import DatoBancarioRead
 
 
-class PersonalCreate(SQLModel):
+class PersonalBase(SQLModel):
     tipo_doc: str = Field(max_length=3)
     num_doc: str = Field(max_length=10)
     primer_nombre: str
@@ -36,6 +36,10 @@ class PersonalCreate(SQLModel):
     ciudad_id: int
     eps_id: int
     status_personal_id: int
+    
+
+class PersonalCreate(PersonalBase):
+    pass
     
 
 class PersonalRead(SQLModel):

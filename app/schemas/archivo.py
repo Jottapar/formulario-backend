@@ -1,8 +1,11 @@
 from datetime import datetime
 from sqlmodel import SQLModel
 
-class ArchivoCreate(SQLModel):
+class ArchivoBase(SQLModel):
     nombre: str
+
+class ArchivoCreate(ArchivoBase):
+    pass
 
 class ArchivoRead(SQLModel):
     id: int

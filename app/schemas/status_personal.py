@@ -1,8 +1,12 @@
 from datetime import datetime
 from sqlmodel import SQLModel
 
-class StatusPersonalCreate(SQLModel):
+
+class StatusPersonalBase(SQLModel):
     nombre:str
+
+class StatusPersonalCreate(StatusPersonalBase):
+    pass
 
 class StatusPersonalRead(SQLModel):
     id: int

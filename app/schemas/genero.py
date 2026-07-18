@@ -1,8 +1,11 @@
 from datetime import datetime
 from sqlmodel import SQLModel
 
-class GeneroCreate(SQLModel):
+class GeneroBase(SQLModel):
     nombre: str
+
+class GeneroCreate(GeneroBase):
+    pass
 
 class GeneroRead(SQLModel):
     id: int
