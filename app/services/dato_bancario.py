@@ -1,16 +1,18 @@
 from sqlmodel import Session, select
 
-from app.utils.exceptions import NotFoundError, ConflictError
-
 from app.models.dato_bancario import DatoBancario
 from app.models.banco import Banco
 from app.models.tipo_cuenta_bancaria import TipoCuentaBancaria
 from app.schemas.dato_bancario import DatoBancarioCreate
 
 
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, AlreadyExistsError, DatabaseError
+
+
 def crear(session: Session, data: DatoBancarioCreate) -> DatoBancario:
-    # --- VALIDACIÓN DE INTEGRIDAD REFERENCIAL (lo nuevo) ---
-    # Antes de insertar, confirmo que las dos FK apunten a algo real.
+    logger.debug(f'Creando nueva relacion Dato bancario')
+
     banco = session.get(Banco, data.banco_id)
     if not banco:
         raise NotFoundError(f"El banco con id {data.banco_id} no existe")
@@ -19,19 +21,26 @@ def crear(session: Session, data: DatoBancarioCreate) -> DatoBancario:
     if not tipo:
         raise NotFoundError(f"El tipo de cuenta con id {data.tipo_cuenta_id} no existe")
 
-    # Si llegué aquí, las dos FK son válidas → inserto con seguridad.
     cuenta = DatoBancario(
         num_cuenta=data.num_cuenta,
         banco_id=data.banco_id,
         tipo_cuenta_id=data.tipo_cuenta_id,
     )
     session.add(cuenta)
-    session.commit()
+    
+    try:
+        session.commit()
+    except Exception as e:
+        logger.exception(f'Fallo al guardar Alimentacion en la Base de DAtos')
+        raise DatabaseError(f'No se pudo guardar el registro')
+
     session.refresh(cuenta)
+    logger.info(f'Dato bancario creado existosamente {cuenta.model_dump()}')
     return cuenta
 
 
 def listar(session: Session) -> list[DatoBancario]:
+
     return session.exec(select(DatoBancario)).all()
 
 

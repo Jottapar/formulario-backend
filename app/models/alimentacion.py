@@ -9,7 +9,7 @@ class Alimentacion(SQLModel, table=True):
     __tablename__= "alimentaciones"
 
     id: int | None = Field(default=None, primary_key=True)
-    nombre: str = Field(max_length=15)
+    nombre: str = Field(max_length=15, unique=True)
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)

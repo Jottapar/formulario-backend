@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
 from app.db.session import get_session
@@ -18,28 +18,15 @@ def get_all(session: Session = Depends(get_session)):
 
 @router.get("/{id}", response_model=AlimentacionRead)
 def get_by_id(id: int, session: Session = Depends(get_session)):
-    alimentacion = service.get_by_id(session, id)
-
-    if alimentacion is None:
-        raise HTTPException(status_code=404, detail='Alimentacion no encontrada')
-    
-    return alimentacion
+    return service.get_by_id(session, id)
 
 @router.put("/{id}", response_model=AlimentacionRead)
-def update(id: int, datos:AlimentacionCreate, session: Session = Depends(get_session)):
-    alimentacion = service.update(session, id, datos)
-
-    if alimentacion is None:
-        raise HTTPException(status_code=404, detail='Alimentacion no se encuentra')
-    
-    return alimentacion
+def update(id: int, datos: AlimentacionCreate, session: Session = Depends(get_session)):
+    return service.update(session, id, datos)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id: int, session: Session = Depends(get_session)):
-    alimentacion = service.delete(session, id)
-
-    if not alimentacion:
-        raise HTTPException(status_code=404, detail='Alimentacion no encontrada')
+    service.delete(session, id)
     
 
 

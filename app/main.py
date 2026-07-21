@@ -2,12 +2,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.core.config import settings
 
-from app.utils.logging_config import setup_logging
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, AlreadyExistsError, BussinesError, DatabaseError
+from app.utils.handlers import not_found_handler, already_exists_handler, bussines_error_handler,database_error_handler
 
 
 from app.api.hub import api_hub
-from app.utils.handlers import not_found_handler, conflict_handler, business_error_handler
-from app.utils.exceptions import NotFoundError, ConflictError, BusinessError
+
 
 
 
@@ -29,9 +30,11 @@ app = FastAPI(
 
 
 
+
 app.add_exception_handler(NotFoundError, not_found_handler)
-app.add_exception_handler(ConflictError, conflict_handler)
-app.add_exception_handler(BusinessError, business_error_handler)
+app.add_exception_handler(AlreadyExistsError, already_exists_handler)
+app.add_exception_handler(BussinesError, bussines_error_handler)
+app.add_exception_handler(DatabaseError, database_error_handler)
 
 app.include_router(api_hub)
 

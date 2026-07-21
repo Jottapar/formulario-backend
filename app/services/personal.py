@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 from datetime import datetime
 
-from app.utils.exceptions import NotFoundError, ConflictError
+from app.utils.errors import NotFoundError
 
 from app.models import Personal, Genero, Alimentacion,Ciudad,Eps, StatusPersonal
 from app.schemas.personal import PersonalCreate, PersonalRead, PersonalUpdate

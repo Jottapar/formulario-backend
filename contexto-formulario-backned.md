@@ -14,12 +14,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.core.config import settings
 
-from app.utils.logging_config import setup_logging
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, AlreadyExistsError, BussinesError, DatabaseError
+from app.utils.handlers import not_found_handler, already_exists_handler, bussines_error_handler,database_error_handler
 
 
 from app.api.hub import api_hub
-from app.utils.handlers import not_found_handler, conflict_handler, business_error_handler
-from app.utils.exceptions import NotFoundError, ConflictError, BusinessError
+
 
 
 
@@ -41,9 +42,11 @@ app = FastAPI(
 
 
 
+
 app.add_exception_handler(NotFoundError, not_found_handler)
-app.add_exception_handler(ConflictError, conflict_handler)
-app.add_exception_handler(BusinessError, business_error_handler)
+app.add_exception_handler(AlreadyExistsError, already_exists_handler)
+app.add_exception_handler(BussinesError, bussines_error_handler)
+app.add_exception_handler(DatabaseError, database_error_handler)
 
 app.include_router(api_hub)
 
@@ -1512,39 +1515,60 @@ from datetime import datetime
 from app.models.alimentacion import Alimentacion
 from app.schemas.alimentacion import AlimentacionCreate, AlimentacionRead
 
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, AlreadyExistsError, BussinesError, DatabaseError
+
+
 def create(session:Session, datos: AlimentacionCreate) -> Alimentacion:
+    logger.debug(f'Creando alimentacion {datos.model_dump()}')
     alimentacion = Alimentacion(nombre= datos.nombre)
     session.add(alimentacion)
     session.commit()
     session.refresh(alimentacion)
+    logger.info(f'Alimentacion creada correctamente | id: {alimentacion.id} | nombre: {alimentacion.nombre}')
     return alimentacion
 
 def get_all(session:Session) -> list[Alimentacion]:
+    logger.debug(f'Buscando todas las alimentaciones')
     consulta = select(Alimentacion)
     resultados = session.exec(consulta).all()
+    logger.info(f'Mostrando todas las alimentaciones')
     return resultados
 
-def get_by_id(session:Session, id: int) -> Alimentacion | None:
-    return session.get(Alimentacion,id)
 
-def update(session:Session, id: int, datos:AlimentacionCreate ) -> Alimentacion | None:
+def get_by_id(session:Session, id: int) -> Alimentacion | None:
+    logger.debug(f'Buscando el id {id} en la tabla alimentaciones')
     consulta = session.get(Alimentacion, id)
 
-    if consulta is None:
-        return None
+    if not consulta:
+        raise NotFoundError(Alimentacion.nombre, id)
+    
+    logger.info(f'Alimentacion: {consulta.nombre} encontrada con su id{consulta.id}')
+    return consulta
+
+
+def update(session:Session, id: int, datos:AlimentacionCreate ) -> Alimentacion | None:
+    logger.debug(f'Comenzando actualizacion del id{id} en la tabla alimentaciones')
+
+    consulta = session.get(Alimentacion, id)
+
+    if not consulta:
+        raise NotFoundError(Alimentacion.nombre, id)
     
     consulta.nombre = datos.nombre
     consulta.updated_at = datetime.now()
     session.add(consulta)
     session.commit()
     session.refresh(consulta)
+    logger.info(f'Actualizacion existosa en el id{consulta.id} ahora con nombre {consulta.nombre}')
     return consulta
 
 def delete(session: Session, id:int) -> bool:
+    logger.debug(f'Comenzando el borrado del id{id} en la tabla alimentaciones')
     consulta = session.get(Alimentacion, id)
 
-    if consulta is None:
-        return False
+    if not consulta:
+        raise NotFoundError(Alimentacion.nombre, id)
     
     session.delete(consulta)
     session.commit()
@@ -1560,7 +1584,7 @@ from datetime import datetime
 import logging
 
 from sqlalchemy.exc import IntegrityError
-from app.utils.exceptions import NotFoundError, ConflictError
+from app.utils.errors import NotFoundError, AlreadyExistsError
 
 from app.models.archivos_personal import ArchivosPersonal
 from app.models.archivos import Archivos
@@ -1804,17 +1828,19 @@ def delete(id:int, session:Session) -> bool:
 ```python
 from sqlmodel import Session, select
 
-from app.utils.exceptions import NotFoundError, ConflictError
-
 from app.models.dato_bancario import DatoBancario
 from app.models.banco import Banco
 from app.models.tipo_cuenta_bancaria import TipoCuentaBancaria
 from app.schemas.dato_bancario import DatoBancarioCreate
 
 
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, AlreadyExistsError
+
+
 def crear(session: Session, data: DatoBancarioCreate) -> DatoBancario:
-    # --- VALIDACIÓN DE INTEGRIDAD REFERENCIAL (lo nuevo) ---
-    # Antes de insertar, confirmo que las dos FK apunten a algo real.
+    logger.debug(f'Creando nueva relacion Dato bancario')
+
     banco = session.get(Banco, data.banco_id)
     if not banco:
         raise NotFoundError(f"El banco con id {data.banco_id} no existe")
@@ -1823,7 +1849,6 @@ def crear(session: Session, data: DatoBancarioCreate) -> DatoBancario:
     if not tipo:
         raise NotFoundError(f"El tipo de cuenta con id {data.tipo_cuenta_id} no existe")
 
-    # Si llegué aquí, las dos FK son válidas → inserto con seguridad.
     cuenta = DatoBancario(
         num_cuenta=data.num_cuenta,
         banco_id=data.banco_id,
@@ -1832,10 +1857,12 @@ def crear(session: Session, data: DatoBancarioCreate) -> DatoBancario:
     session.add(cuenta)
     session.commit()
     session.refresh(cuenta)
+    logger.info(f'Dato bancario creado existosamente {cuenta.model_dump()}')
     return cuenta
 
 
 def listar(session: Session) -> list[DatoBancario]:
+
     return session.exec(select(DatoBancario)).all()
 
 
@@ -1957,7 +1984,7 @@ def delete(id: int, session:Session):
 from sqlmodel import Session, select
 from datetime import datetime
 
-from app.utils.exceptions import NotFoundError, ConflictError
+from app.utils.errors import NotFoundError
 
 from app.models import Personal, Genero, Alimentacion,Ciudad,Eps, StatusPersonal
 from app.schemas.personal import PersonalCreate, PersonalRead, PersonalUpdate
@@ -2138,4 +2165,114 @@ def eliminar(session: Session, tipo_id: int) -> bool:
 
 ```python
 
+```
+
+--- FILE: app/utils/errors.py ---
+
+```python
+
+class NotFoundError(Exception):
+    def __init__(self,entity:str, id: int = None):
+        self.id = id
+        self.entity = entity
+        message = f'El {entity.name} con el id {id} no se encontro' if id else f'ID {id} no existe'
+        super().__init__(message)
+
+class AlreadyExistsError(Exception):
+    def __init__(self,entity: str, field: str, value: str):
+        self.entity = entity
+        self.field = field
+        self.value = value
+        message = f'{entity} con {field}={value} ya existe'
+        super().__init__(message)
+
+class BussinesError(Exception):
+    def __init__(self, message: str):
+        super().__init__(message) 
+
+class DatabaseError(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
+```
+
+--- FILE: app/utils/handlers.py ---
+
+```python
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+from app.utils.errors import NotFoundError, AlreadyExistsError, BussinesError, DatabaseError
+from app.utils.logger import logger
+
+
+async def not_found_handler(request: Request, exc: NotFoundError):
+    logger.warning(f'NOT FOUND | {exc} | {request.method} {request.url}')
+    return JSONResponse(
+        status_code=404,
+        content={
+            'error': 'not_found',
+            'message': str(exc)
+        }
+    )
+
+async def already_exists_handler(request: Request, exc:AlreadyExistsError):
+    logger.warning(f'CONFLICTO | {exc} | {request.method} {request.url}')
+    return JSONResponse(
+        status_code=409,
+        content={
+            'error': 'Ya existe',
+            'message': str(exc)
+        }
+    )
+
+
+async def bussines_error_handler(request: Request, exc: BussinesError):
+    logger.error(f'ERROR | {exc} | {request.method} {request.url}')
+    return JSONResponse(
+        status_code= 422,
+        content={
+            'error': 'business_error',
+            'message': str(exc)
+        }
+    )
+
+async def database_error_handler(request: Request, exc: DatabaseError):
+    logger.error(f'DATABASE ERROR |  {exc} | {request.method} {request.url}')
+    return JSONResponse(
+        status_code=500,
+        content={
+            'error': 'database_error',
+            'message': str(exc)
+        }
+    )
+
+
+
+```
+
+--- FILE: app/utils/logger.py ---
+
+```python
+from loguru import logger
+import sys
+
+logger.remove()
+
+logger.add(
+    sys.stdout,
+    format= '<level>{time:YYYY:MM:DD}</level> | <level>{level:<8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | <cyan>{message}</cyan>',
+    level= 'DEBUG',
+    colorize= True
+)
+
+logger.add(
+    'logs/app.logs',
+    format= '{time:YYYY:MM:DD HH:mm:ss} | {level:<8} | {name}:{function}:{line} | {message}',
+    level= 'INFO',
+    rotation='1 day',
+    retention='7 days',
+    encoding='utf-8'
+)
+
+__all__=['logger']
 ```
