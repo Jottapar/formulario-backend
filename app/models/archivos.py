@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .archivos_personal import ArchivosPersonal
 
-class Archivos(SQLModel, table=True):
+class Archivo(SQLModel, table=True):
     __tablename__= "archivos"
 
     id: int | None = Field(default=None, primary_key=True)

@@ -73,6 +73,8 @@ class PersonalRead(SQLModel):
     status_personal: StatusPersonalRead
     datos_bancarios: list[DatoBancarioRead]
 
+class PersonalMinimo(SQLModel):
+    id: int
 
 class PersonalUpdate(SQLModel):
     tipo_doc: str | None = Field(default=None, max_length=3)  

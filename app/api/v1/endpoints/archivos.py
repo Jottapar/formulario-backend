@@ -17,25 +17,12 @@ def get_all(session: Session = Depends(get_session)):
  
 @router.get("/{id}", response_model=ArchivoRead)
 def get_by_id(id: int, session:Session = Depends(get_session)):
-    archivo = services.get_by_id(id, session)
-
-    if archivo is None:
-        raise HTTPException(status_code=404, detail='Archivo no encontrado')
-    
-    return archivo
+    return services.get_by_id(id, session)
 
 @router.put("/{id}", response_model=ArchivoRead, status_code=status.HTTP_200_OK)
 def update(id: int, datos: ArchivoCreate, session: Session = Depends(get_session)):
-    archivo = services.update(id, datos, session)
-
-    if archivo is None:
-        raise HTTPException(status_code=404, detail='Archivo no encontrado')
-    
-    return archivo
+    return services.update(id, datos, session)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id: int, session: Session = Depends(get_session)):
-    archivo = services.delete(id, session)
-
-    if not archivo:
-        raise HTTPException(status_code=404, detail='Archivo no encontrado')
+    services.delete(id, session)

@@ -3,39 +3,30 @@ from sqlmodel import Session
 
 from app.db.session import get_session
 from app.schemas.tipo_cuenta_bancaria import TipoCuentaCreate, TipoCuentaRead
-from app.services import tipo_cuenta_bancaria as service
+from app.services import tipo_cuenta_bancaria as services
 
 router = APIRouter(prefix="/tipos-cuentas", tags=["tipos_cuentas"])
 
 
 @router.post("/", response_model=TipoCuentaRead)
-def crear(data: TipoCuentaCreate, session: Session = Depends(get_session)):
-    return service.crear(session, data)
+def create(data: TipoCuentaCreate, session: Session = Depends(get_session)):
+    return services.creatr(session, data)
 
 
 @router.get("/", response_model=list[TipoCuentaRead])
-def listar(session: Session = Depends(get_session)):
-    return service.listar(session)
+def get_all(session: Session = Depends(get_session)):
+    return services.get_all(session)
 
 
-@router.get("/{tipo_id}", response_model=TipoCuentaRead)
-def obtener(tipo_id: int, session: Session = Depends(get_session)):
-    tipo = service.obtener(session, tipo_id)
-    if not tipo:
-        raise HTTPException(status_code=404, detail="Tipo de cuenta no encontrado")
-    return tipo
+@router.get("/{id}", response_model=TipoCuentaRead)
+def get_by_id(id: int, session: Session = Depends(get_session)):
+    return services.get_by_id(id, session)
 
 
-@router.put("/{tipo_id}", response_model=TipoCuentaRead)
-def actualizar(tipo_id: int, data: TipoCuentaCreate, session: Session = Depends(get_session)):
-    tipo = service.actualizar(session, tipo_id, data)
-    if not tipo:
-        raise HTTPException(status_code=404, detail="Tipo de cuenta no encontrado")
-    return tipo
+@router.put("/{id}", response_model=TipoCuentaRead)
+def update(id: int, data: TipoCuentaCreate, session: Session = Depends(get_session)):
+    return services.update(id, data, session)
 
-
-@router.delete("/{tipo_id}")
-def eliminar(tipo_id: int, session: Session = Depends(get_session)):
-    if not service.eliminar(session, tipo_id):
-        raise HTTPException(status_code=404, detail="Tipo de cuenta no encontrado")
-    return {"ok": True}
+@router.delete("/{id}")
+def eliminar(id: int, session: Session = Depends(get_session)):
+    services.delete(id, session)

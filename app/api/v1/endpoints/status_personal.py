@@ -21,25 +21,12 @@ def get_all(session: Session = Depends(get_session))-> list[StatusPersonalRead]:
 
 @router.get("/{id}", response_model=StatusPersonalRead)
 def get_by_id(id: int, session: Session = Depends(get_session))->StatusPersonalRead:
-    status=services.get_by_id(id, session)
-
-    if status is None:
-        raise HTTPException(status_code=404, detail='Status No encontrado')
-    
-    return status
+    return services.get_by_id(id, session)
 
 @router.put("/{id}",response_model=StatusPersonalRead,status_code=status.HTTP_200_OK)
 def update(id:int, datos:StatusPersonalCreate, session: Session = Depends(get_session))->StatusPersonalRead:
-    status= services.update(id,datos, session)
-
-    if status is None:
-        raise HTTPException(status_code=404, detail='Status no encontrado')
-    
-    return status
+    return services.update(id,datos, session)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id:int, session:Session = Depends(get_session)):
-    status= services.delete(id,session)
-
-    if not status:
-        raise HTTPException(status_code=404, detail='Status no encontrado')
+    services.delete(id,session)

@@ -113,7 +113,7 @@ router_v1.include_router(personal.router)
 --- FILE: app/api/v1/endpoints/alimentacion.py ---
 
 ```python
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
 from app.db.session import get_session
@@ -133,28 +133,15 @@ def get_all(session: Session = Depends(get_session)):
 
 @router.get("/{id}", response_model=AlimentacionRead)
 def get_by_id(id: int, session: Session = Depends(get_session)):
-    alimentacion = service.get_by_id(session, id)
-
-    if alimentacion is None:
-        raise HTTPException(status_code=404, detail='Alimentacion no encontrada')
-    
-    return alimentacion
+    return service.get_by_id(session, id)
 
 @router.put("/{id}", response_model=AlimentacionRead)
-def update(id: int, datos:AlimentacionCreate, session: Session = Depends(get_session)):
-    alimentacion = service.update(session, id, datos)
-
-    if alimentacion is None:
-        raise HTTPException(status_code=404, detail='Alimentacion no se encuentra')
-    
-    return alimentacion
+def update(id: int, datos: AlimentacionCreate, session: Session = Depends(get_session)):
+    return service.update(session, id, datos)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id: int, session: Session = Depends(get_session)):
-    alimentacion = service.delete(session, id)
-
-    if not alimentacion:
-        raise HTTPException(status_code=404, detail='Alimentacion no encontrada')
+    service.delete(session, id)
     
 
 
@@ -192,29 +179,17 @@ def get_all(session: Session = Depends(get_session)):
 
 @router.get("/{id}", response_model=list[ArchivoPersonalRead])
 def get_by_personal_id(id: int, session:Session = Depends(get_session)):
-    consulta = services.get_by_personal_id(id,session)
-
-    if not consulta:
-        raise HTTPException(status_code=404, detail='Personal no tiene Aarchivos relacionados')
-
-    return consulta
+    return services.get_by_personal_id(id,session)
 
 
 @router.patch("/{id}", response_model=ArchivoPersonalRead, status_code=status.HTTP_200_OK)
 def update_url(id: int, datos:ArchivoPersonalUpdate, session: Session = Depends(get_session)):
-    new_update = services.update_url(id, datos, session)
-
-    if new_update is None:
-        raise HTTPException(status_code=404, detail='No hay archivos relacionados de esa persona')
-    
-    return new_update
+    return services.update_url(id, datos, session)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id: int, session: Session = Depends(get_session)):
     registro = services.delete(id,session)
 
-    if not registro:
-        raise HTTPException(status_code=404, detail='archivo de la persona no encontrado')
 
 
 ```
@@ -241,28 +216,15 @@ def get_all(session: Session = Depends(get_session)):
  
 @router.get("/{id}", response_model=ArchivoRead)
 def get_by_id(id: int, session:Session = Depends(get_session)):
-    archivo = services.get_by_id(id, session)
-
-    if archivo is None:
-        raise HTTPException(status_code=404, detail='Archivo no encontrado')
-    
-    return archivo
+    return services.get_by_id(id, session)
 
 @router.put("/{id}", response_model=ArchivoRead, status_code=status.HTTP_200_OK)
 def update(id: int, datos: ArchivoCreate, session: Session = Depends(get_session)):
-    archivo = services.update(id, datos, session)
-
-    if archivo is None:
-        raise HTTPException(status_code=404, detail='Archivo no encontrado')
-    
-    return archivo
+    return services.update(id, datos, session)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id: int, session: Session = Depends(get_session)):
-    archivo = services.delete(id, session)
-
-    if not archivo:
-        raise HTTPException(status_code=404, detail='Archivo no encontrado')
+    services.delete(id, session)
 
 ```
 
@@ -274,41 +236,31 @@ from sqlmodel import Session
 
 from app.db.session import get_session
 from app.schemas.banco import BancoCreate, BancoRead
-from app.services import banco as banco_service
+from app.services import banco as services
 
 router = APIRouter(prefix="/bancos", tags=["bancos"])
 
 
 @router.post("/", response_model=BancoRead, status_code=status.HTTP_201_CREATED)
-def crear(datos: BancoCreate, session: Session = Depends(get_session)):
-    return banco_service.crear_banco(session, datos)
-
+def create(datos: BancoCreate, session: Session = Depends(get_session)):
+    return services.create(session, datos)
 
 @router.get("/", response_model=list[BancoRead])
-def listar(session: Session = Depends(get_session)):
-    return banco_service.listar_bancos(session)
+def get_all(session: Session = Depends(get_session)):
+    return services.get_all(session)
 
 @router.get("/{id}", response_model=BancoRead)
-def obtener(banco_id: int, session: Session = Depends(get_session)):
-    banco = banco_service.obtener_banco(session, banco_id)
-    if banco is None:
-        raise HTTPException(status_code=404, detail="Banco no encontrado")
-    return banco
-
+def get_by_id(banco_id: int, session: Session = Depends(get_session)):
+    return services.get_by_id(session, banco_id)
 
 @router.put("/{id}", response_model=BancoRead)
-def actualizar(banco_id: int, datos: BancoCreate, session: Session = Depends(get_session)):
-    banco = banco_service.actualizar_banco(session, banco_id, datos)
-    if banco is None:
-        raise HTTPException(status_code=404, detail="Banco no encontrado")
-    return banco
-
+def update(banco_id: int, datos: BancoCreate, session: Session = Depends(get_session)):
+    return services.update(session, banco_id, datos)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar(banco_id: int, session: Session = Depends(get_session)):
-    exito = banco_service.eliminar_banco(session, banco_id)
-    if not exito:
-        raise HTTPException(status_code=404, detail="Banco no encontrado")
+def delete(banco_id: int, session: Session = Depends(get_session)):
+    services.delete(session, banco_id)
+    
 ```
 
 --- FILE: app/api/v1/endpoints/ciudad.py ---
@@ -333,28 +285,15 @@ def get_all(session: Session = Depends(get_session)) -> list[CiudadRead]:
 
 @router.get("/{id}", response_model=CiudadRead)
 def get_by_id(id: int, session: Session = Depends(get_session)) -> CiudadRead:
-    ciudad = services.get_by_id(id, session)
-
-    if ciudad is None:
-        raise HTTPException(status_code=404, detail='Ciudad no encontrada')
-    return ciudad
+    return services.get_by_id(id, session)
 
 @router.put("/{id}", response_model=CiudadRead)
 def update(id:int, datos:CiudadCreate, session: Session = Depends(get_session)) -> CiudadRead:
-    ciudad =services.update(id, datos, session)
-
-    if ciudad is None:
-        raise HTTPException(status_code=404, detail='Ciudad no encontrada')
-    
-    return ciudad
+    return services.update(id, datos, session)
 
 @router.delete("/{id}",status_code=status.HTTP_204_NO_CONTENT)
 def delete(id:int, session: Session = Depends(get_session)):
-    ciudad = services.delete(id, session)
-
-    if not ciudad:
-        raise HTTPException(status_code=404, detail='Ciudad no encontrada')
-    
+    services.delete(id, session)
 
 ```
 
@@ -366,39 +305,30 @@ from sqlmodel import Session
 
 from app.db.session import get_session
 from app.schemas.dato_bancario import DatoBancarioCreate, DatoBancarioRead
-from app.services import dato_bancario as service
+from app.services import dato_bancario as services
 
 router = APIRouter(prefix="/datos-bancarios", tags=["datos_bancarios"])
 
 
 @router.post("/", response_model=DatoBancarioRead)
-def crear(data: DatoBancarioCreate, session: Session = Depends(get_session)):
-    try:
-        return service.crear(session, data)
-    except ValueError as e:
-        # El service lanzó ValueError porque una FK no existe.
-        # Lo traduzco a un 404 HTTP limpio (dato malo del cliente, no error mío).
-        raise HTTPException(status_code=404, detail=str(e))
-
+def create(data: DatoBancarioCreate, session: Session = Depends(get_session)):
+    return services.create(session, data)
 
 @router.get("/", response_model=list[DatoBancarioRead])
-def listar(session: Session = Depends(get_session)):
-    return service.listar(session)
+def get_all(session: Session = Depends(get_session)):
+    return services.get_all(session)
 
 
-@router.get("/{cuenta_id}", response_model=DatoBancarioRead)
-def obtener(cuenta_id: int, session: Session = Depends(get_session)):
-    cuenta = service.obtener(session, cuenta_id)
-    if not cuenta:
-        raise HTTPException(status_code=404, detail="Cuenta no encontrada")
+@router.get("/{id}", response_model=DatoBancarioRead)
+def get_by_id(id: int, session: Session = Depends(get_session)):
+    cuenta = services.get_by_id(id, session)
     return cuenta
 
 
-@router.delete("/{cuenta_id}")
-def eliminar(cuenta_id: int, session: Session = Depends(get_session)):
-    if not service.eliminar(session, cuenta_id):
-        raise HTTPException(status_code=404, detail="Cuenta no encontrada")
-    return {"ok": True}
+@router.delete("/{id}")
+def delete(id: int, session: Session = Depends(get_session)):
+    services.delete(id, session)
+     
 ```
 
 --- FILE: app/api/v1/endpoints/eps.py ---
@@ -424,28 +354,16 @@ def get_all(session: Session = Depends(get_session))->list[EpsRead]:
 
 @router.get("/{id}", response_model=EpsRead,status_code=status.HTTP_200_OK)
 def get_by_id(id:int, session:Session=Depends(get_session))->EpsRead:
-    eps=services.get_by_id(id, session)
-
-    if eps is None:
-        raise HTTPException(status_code=404, detail='Eps no encontrada')
-    
-    return eps
+    return services.get_by_id(id, session)
 
 @router.put("/{id}", response_model=EpsRead)
 def update(id:int, datos:EpsCreate, session:Session = Depends(get_session)) -> EpsRead :
-    eps = services.update(id,datos,session)
-
-    if eps is None:
-        raise HTTPException(id, datos, session)
-    
-    return eps
+    return services.update(id,datos,session)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id:int, session:Session = Depends(get_session)):
-    eps = services.delete(id,session)
+    services.delete(id,session)
 
-    if not eps:
-        raise HTTPException(status_code=404, detail='Eps no encontrada')
 ```
 
 --- FILE: app/api/v1/endpoints/genero.py ---
@@ -470,29 +388,16 @@ def get_all(session: Session = Depends(get_session))->list[GeneroRead]:
 
 @router.get("/{id}", response_model=GeneroRead, status_code=status.HTTP_200_OK)
 def get_by_id(id: int, session: Session = Depends(get_session))-> GeneroRead:
-    genero = services.get_by_id(id, session)
-
-    if genero is None:
-        raise HTTPException(status_code=404, detail='Este genero no se encontro')
-    
-    return genero
+    return services.get_by_id(id, session)
 
 @router.put("/{id}", response_model=GeneroRead)
 def update(id:int, datos: GeneroCreate, session: Session=Depends(get_session))-> GeneroRead:
-    genero = services.update(id, datos, session)
-
-    if genero is None:
-        raise HTTPException(status_code=404, detail='Genero no encontrado')
-    
-    return genero
+    return services.update(id, datos, session)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id:int, session: Session = Depends(get_session)):
-    genero = services.delete(id, session)
+    services.delete(id, session)
 
-    if not genero:
-        raise HTTPException(status_code=404,detail='Genero no encontrado')
-    
 
 ```
 
@@ -519,28 +424,16 @@ def get_all(session: Session = Depends(get_session))-> list[PersonalCreate]:
 
 @router.get("/{id}", response_model=PersonalRead)
 def get_by_id(id:int, session: Session = Depends(get_session))-> PersonalRead:
-    registro= services.get_by_id(id, session)
-
-    if registro is None:
-        raise HTTPException(status_code=404, detail='Persona no existe')
-    
-    return registro
+    return services.get_by_id(id, session)
 
 @router.patch("/{id}", response_model=PersonalRead, status_code=status.HTTP_200_OK)
 def update(id: int, datos:PersonalUpdate, session: Session = Depends(get_session))->PersonalRead:
-    registro = services.update(id, datos, session)
-
-    if registro is None:
-        raise HTTPException(status_code=404, detail='La persona no existe')
-    
-    return registro
+    return services.update(id, datos, session)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id:int, session:Session=Depends(get_session)):
-    registro = services.delete(id, session)
+    services.delete(id, session)
 
-    if not registro:
-        raise HTTPException(status_code=404, detail='Persona no existe')   
 ```
 
 --- FILE: app/api/v1/endpoints/status_personal.py ---
@@ -569,28 +462,16 @@ def get_all(session: Session = Depends(get_session))-> list[StatusPersonalRead]:
 
 @router.get("/{id}", response_model=StatusPersonalRead)
 def get_by_id(id: int, session: Session = Depends(get_session))->StatusPersonalRead:
-    status=services.get_by_id(id, session)
-
-    if status is None:
-        raise HTTPException(status_code=404, detail='Status No encontrado')
-    
-    return status
+    return services.get_by_id(id, session)
 
 @router.put("/{id}",response_model=StatusPersonalRead,status_code=status.HTTP_200_OK)
 def update(id:int, datos:StatusPersonalCreate, session: Session = Depends(get_session))->StatusPersonalRead:
-    status= services.update(id,datos, session)
-
-    if status is None:
-        raise HTTPException(status_code=404, detail='Status no encontrado')
-    
-    return status
+    return services.update(id,datos, session)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id:int, session:Session = Depends(get_session)):
-    status= services.delete(id,session)
+    services.delete(id,session)
 
-    if not status:
-        raise HTTPException(status_code=404, detail='Status no encontrado')
 ```
 
 --- FILE: app/api/v1/endpoints/tipo_cuenta_bancaria.py ---
@@ -601,42 +482,33 @@ from sqlmodel import Session
 
 from app.db.session import get_session
 from app.schemas.tipo_cuenta_bancaria import TipoCuentaCreate, TipoCuentaRead
-from app.services import tipo_cuenta_bancaria as service
+from app.services import tipo_cuenta_bancaria as services
 
 router = APIRouter(prefix="/tipos-cuentas", tags=["tipos_cuentas"])
 
 
 @router.post("/", response_model=TipoCuentaRead)
-def crear(data: TipoCuentaCreate, session: Session = Depends(get_session)):
-    return service.crear(session, data)
+def create(data: TipoCuentaCreate, session: Session = Depends(get_session)):
+    return services.creatr(session, data)
 
 
 @router.get("/", response_model=list[TipoCuentaRead])
-def listar(session: Session = Depends(get_session)):
-    return service.listar(session)
+def get_all(session: Session = Depends(get_session)):
+    return services.get_all(session)
 
 
-@router.get("/{tipo_id}", response_model=TipoCuentaRead)
-def obtener(tipo_id: int, session: Session = Depends(get_session)):
-    tipo = service.obtener(session, tipo_id)
-    if not tipo:
-        raise HTTPException(status_code=404, detail="Tipo de cuenta no encontrado")
-    return tipo
+@router.get("/{id}", response_model=TipoCuentaRead)
+def get_by_id(id: int, session: Session = Depends(get_session)):
+    return services.get_by_id(id, session)
 
 
-@router.put("/{tipo_id}", response_model=TipoCuentaRead)
-def actualizar(tipo_id: int, data: TipoCuentaCreate, session: Session = Depends(get_session)):
-    tipo = service.actualizar(session, tipo_id, data)
-    if not tipo:
-        raise HTTPException(status_code=404, detail="Tipo de cuenta no encontrado")
-    return tipo
+@router.put("/{id}", response_model=TipoCuentaRead)
+def update(id: int, data: TipoCuentaCreate, session: Session = Depends(get_session)):
+    return services.update(id, data, session)
 
-
-@router.delete("/{tipo_id}")
-def eliminar(tipo_id: int, session: Session = Depends(get_session)):
-    if not service.eliminar(session, tipo_id):
-        raise HTTPException(status_code=404, detail="Tipo de cuenta no encontrado")
-    return {"ok": True}
+@router.delete("/{id}")
+def eliminar(id: int, session: Session = Depends(get_session)):
+    services.delete(id, session)
 ```
 
 --- FILE: app/core/__init__.py ---
@@ -721,7 +593,7 @@ from .dato_bancario import DatoBancario
 from .genero import Genero
 from .eps import Eps
 from .alimentacion import Alimentacion
-from .archivos import Archivos
+from .archivos import Archivo
 from .archivos_personal import ArchivosPersonal
 from .ciudad import Ciudad
 from .personal import Personal
@@ -731,7 +603,7 @@ from .rol import Rol
 
 
 __all__ = ["Banco", "TipoCuentaBancaria", "DatoBancario", "Genero", "Eps", "Alimentacion", 
-           "Archivos", "ArchivosPersonal","Ciudad", "Personal", "StatusPersonal", 'Usuario', 'Rol'
+           "Archivo", "ArchivosPersonal","Ciudad", "Personal", "StatusPersonal", 'Usuario', 'Rol'
            ]
 ```
 
@@ -749,7 +621,7 @@ class Alimentacion(SQLModel, table=True):
     __tablename__= "alimentaciones"
 
     id: int | None = Field(default=None, primary_key=True)
-    nombre: str = Field(max_length=15)
+    nombre: str = Field(max_length=15, unique=True)
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -769,7 +641,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .archivos_personal import ArchivosPersonal
 
-class Archivos(SQLModel, table=True):
+class Archivo(SQLModel, table=True):
     __tablename__= "archivos"
 
     id: int | None = Field(default=None, primary_key=True)
@@ -792,12 +664,12 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .personal import Personal
-    from .archivos import Archivos
+    from .archivos import Archivo
 
 class ArchivosPersonal(SQLModel, table=True):
     __tablename__= "archivos_personal"
     __table_args__= (
-        UniqueConstraint("personal_id","archivos_id", name="uq_persona_tipo"),
+        UniqueConstraint("personal_id","archivos_id", name="uq_personal_archivos"),
     )
 
     id: int | None = Field(default=None, primary_key=True)
@@ -809,7 +681,7 @@ class ArchivosPersonal(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.now)
 
     personal: "Personal" = Relationship(back_populates="archivos_personal")
-    archivos: "Archivos" = Relationship(back_populates="archivos_personal")
+    archivos: "Archivo" = Relationship(back_populates="archivos_personal")
 ```
 
 --- FILE: app/models/banco.py ---
@@ -973,7 +845,6 @@ class Personal(SQLModel, table=True):
     telefono: str
     fecha_nacimiento: date
     correo: EmailStr
-    ciudad: str
     direccion: str = Field(max_length=100)
     nombre_emergencia: str
     telefono_emergencia: str
@@ -1225,11 +1096,20 @@ class CiudadRead(SQLModel):
 --- FILE: app/schemas/dato_bancario.py ---
 
 ```python
+# app/schemas/dato_bancario.py
 from datetime import datetime
 from sqlmodel import SQLModel
 
 from app.schemas.banco import BancoRead
 from app.schemas.tipo_cuenta_bancaria import TipoCuentaRead
+
+
+class PersonalMinimo(SQLModel):
+    id: int
+    primer_nombre: str
+    primer_apellido: str
+    num_doc: str
+
 
 class DatoBancarioBase(SQLModel):
     num_cuenta: str
@@ -1244,9 +1124,9 @@ class DatoBancarioRead(SQLModel):
     num_cuenta: str
     banco: BancoRead
     tipo_cuenta: TipoCuentaRead
-    created_at: datetime 
+    personal: PersonalMinimo          # <- usa el que definiste arriba, en el mismo archivo
+    created_at: datetime
     updated_at: datetime
-
 
 
 
@@ -1373,6 +1253,8 @@ class PersonalRead(SQLModel):
     status_personal: StatusPersonalRead
     datos_bancarios: list[DatoBancarioRead]
 
+class PersonalMinimo(SQLModel):
+    id: int
 
 class PersonalUpdate(SQLModel):
     tipo_doc: str | None = Field(default=None, max_length=3)  
@@ -1513,17 +1395,31 @@ class UsuarioRead(SQLModel):
 from sqlmodel import Session, select
 from datetime import datetime
 from app.models.alimentacion import Alimentacion
-from app.schemas.alimentacion import AlimentacionCreate, AlimentacionRead
+from app.schemas.alimentacion import AlimentacionCreate
 
 from app.utils.logger import logger
 from app.utils.errors import NotFoundError, AlreadyExistsError, BussinesError, DatabaseError
 
+from sqlalchemy.exc import IntegrityError
 
 def create(session:Session, datos: AlimentacionCreate) -> Alimentacion:
     logger.debug(f'Creando alimentacion {datos.model_dump()}')
     alimentacion = Alimentacion(nombre= datos.nombre)
     session.add(alimentacion)
-    session.commit()
+
+    try:
+        session.commit()
+
+    except IntegrityError:
+        session.rollback()
+        logger.warning(f'Intento de crear alimentacion duplicada: {datos.nombre}')
+        raise AlreadyExistsError("Alimentacion", "nombre", datos.nombre)
+    
+    except Exception:
+        session.rollback()
+        logger.exception('Fallo inesperado al guardar Alimentacion')
+        raise DatabaseError("No se pudo guardar el registro")
+
     session.refresh(alimentacion)
     logger.info(f'Alimentacion creada correctamente | id: {alimentacion.id} | nombre: {alimentacion.nombre}')
     return alimentacion
@@ -1531,7 +1427,14 @@ def create(session:Session, datos: AlimentacionCreate) -> Alimentacion:
 def get_all(session:Session) -> list[Alimentacion]:
     logger.debug(f'Buscando todas las alimentaciones')
     consulta = select(Alimentacion)
-    resultados = session.exec(consulta).all()
+    
+    try:
+        resultados = session.exec(consulta).all()
+
+    except Exception:
+        logger.exception(f'No se pudo conectar a la BD')
+        raise DatabaseError(f'No se pudo conectar a la BD')
+    
     logger.info(f'Mostrando todas las alimentaciones')
     return resultados
 
@@ -1539,41 +1442,59 @@ def get_all(session:Session) -> list[Alimentacion]:
 def get_by_id(session:Session, id: int) -> Alimentacion | None:
     logger.debug(f'Buscando el id {id} en la tabla alimentaciones')
     consulta = session.get(Alimentacion, id)
-
+    
     if not consulta:
-        raise NotFoundError(Alimentacion.nombre, id)
+        raise NotFoundError('Alimentacion', id)
     
     logger.info(f'Alimentacion: {consulta.nombre} encontrada con su id{consulta.id}')
     return consulta
 
 
-def update(session:Session, id: int, datos:AlimentacionCreate ) -> Alimentacion | None:
-    logger.debug(f'Comenzando actualizacion del id{id} en la tabla alimentaciones')
-
+def update(session: Session, id: int, datos: AlimentacionCreate) -> Alimentacion:
+    logger.debug(f'Comenzando actualizacion del id {id} en la tabla alimentaciones')
     consulta = session.get(Alimentacion, id)
-
     if not consulta:
-        raise NotFoundError(Alimentacion.nombre, id)
-    
+        raise NotFoundError('Alimentacion', id)
+
     consulta.nombre = datos.nombre
     consulta.updated_at = datetime.now()
     session.add(consulta)
-    session.commit()
+
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        logger.warning(f'Intento de actualizar a nombre duplicado: {datos.nombre}')
+        raise AlreadyExistsError("Alimentacion", "nombre", datos.nombre)
+    except Exception:
+        session.rollback()
+        logger.exception('Fallo inesperado al actualizar Alimentacion')
+        raise DatabaseError("No se pudo actualizar el registro")
+
     session.refresh(consulta)
-    logger.info(f'Actualizacion existosa en el id{consulta.id} ahora con nombre {consulta.nombre}')
+    logger.info(f'Actualizacion exitosa en el id {consulta.id} ahora con nombre {consulta.nombre}')
     return consulta
 
-def delete(session: Session, id:int) -> bool:
-    logger.debug(f'Comenzando el borrado del id{id} en la tabla alimentaciones')
+def delete(session: Session, id: int) -> bool:
+    logger.debug(f'Comenzando el borrado del id {id} en la tabla alimentaciones')
     consulta = session.get(Alimentacion, id)
-
     if not consulta:
-        raise NotFoundError(Alimentacion.nombre, id)
-    
-    session.delete(consulta)
-    session.commit()
-    return True
+        raise NotFoundError('Alimentacion', id)
 
+    try:
+        session.delete(consulta)
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        logger.warning(f'No se pudo eliminar Alimentacion id={id}, tiene registros relacionados')
+        raise BussinesError("No se puede eliminar: hay personal asociado a esta alimentacion")
+    except Exception:
+        session.rollback()
+        logger.exception('Fallo inesperado al eliminar Alimentacion')
+        raise DatabaseError("No se pudo eliminar el registro")
+
+    logger.info(f'Alimentacion eliminada | id: {id}')
+    return True
 ```
 
 --- FILE: app/services/archivo_personal.py ---
@@ -1581,29 +1502,29 @@ def delete(session: Session, id:int) -> bool:
 ```python
 from sqlmodel import Session, select
 from datetime import datetime
-import logging
+
 
 from sqlalchemy.exc import IntegrityError
-from app.utils.errors import NotFoundError, AlreadyExistsError
+from app.utils.errors import NotFoundError, AlreadyExistsError, DatabaseError
 
 from app.models.archivos_personal import ArchivosPersonal
-from app.models.archivos import Archivos
+from app.models.archivos import Archivo
 from app.models.personal import Personal
-from app.schemas.archivo_personal import ArchivoPersonalCreate, ArchivoPersonalRead,ArchivoPersonalUpdate
+from app.schemas.archivo_personal import ArchivoPersonalCreate,ArchivoPersonalUpdate
 
-
-logger = logging.getLogger(__name__)
-
+from app.utils.logger import logger
 
 def create(datos:ArchivoPersonalCreate, session:Session)-> ArchivosPersonal:
-    archivo = session.get(Archivos, datos.archivos_id)
+    logger.debug(f'Creando archivos_personal de la personal {datos.model_dump()}')
+
+    archivo = session.get(Archivo, datos.archivos_id)
     persona = session.get(Personal, datos.personal_id)
 
     if not archivo:
-        raise NotFoundError(f'El archivo con id {datos.archivos_id} no existe')
+        raise NotFoundError('Archivo',datos.archivos_id)
     
     if not persona:
-        raise NotFoundError(f'La persona con id {datos.personal_id} no existe')
+        raise NotFoundError('Personal',datos.personal_id)
     
     new_record = ArchivosPersonal(
         personal_id=datos.personal_id,
@@ -1615,51 +1536,97 @@ def create(datos:ArchivoPersonalCreate, session:Session)-> ArchivosPersonal:
 
     try:
         session.commit()
+        
     except IntegrityError:
         session.rollback()
-        raise ConflictError("Esta persona ya tiene un archivo de este tipo")
+        logger.warning(f'Ya existe un archivo {datos.archivos_id} asociado a personal {datos.personal_id}')
+        raise AlreadyExistsError('ArchivosPersonal', 'personal_id + archivos_id', f'{datos.personal_id}-{datos.archivos_id}')
+    except Exception:
+        session.rollback()
+        logger.exception('Fallo inesperado al crear ArchivosPersonal')
+        raise DatabaseError('No se pudo guardar el registro')
 
     session.refresh(new_record)
-    logger.info(f"ArchivoPersonal creado con id {new_record.id}")   # evento normal
+    logger.info(f"ArchivoPersonal creado con id {new_record.id}")
     return new_record
 
 
-
-
 def get_all(session: Session)-> list[ArchivosPersonal]:
-    registros=select(ArchivosPersonal)
-    resultado= session.exec(registros).all()
+    logger.debug(f'Buscando todos los archivos de personal')
+    
+    try:
+        registros=select(ArchivosPersonal)
+        resultado= session.exec(registros).all()
+    except Exception:
+        logger.exception('Fallo al conectarse a la base de datos')
+        raise DatabaseError('Fallo al conectarse a la base de datos')
+    
+    logger.info(f'Listado de archivo_personal creado')
     return resultado
 
-def get_by_personal_id(id:int, session:Session) -> list[ArchivosPersonal]:
-    registros= select(ArchivosPersonal).where(ArchivosPersonal.personal_id == id)
-    resultado= session.exec(registros).all()
+
+def get_by_personal_id(id: int, session: Session) -> list[ArchivosPersonal]:
+    logger.debug(f'Buscando Archivos asociados a la persona con id {id}')
+
+    persona = session.get(Personal, id)
+    if not persona:
+        raise NotFoundError('Personal', id)
+
+    try:
+        registros = select(ArchivosPersonal).where(ArchivosPersonal.personal_id == id)
+        resultado = session.exec(registros).all()
+    except Exception:
+        logger.exception('Fallo al conectarse a la base de datos')
+        raise DatabaseError('Fallo al conectarse a la base de datos')
+
+    logger.info(f'{len(resultado)} archivo(s) encontrados para persona id {id}')
     return resultado
+
 
 def update_url(id:int, datos:ArchivoPersonalUpdate, session:Session) -> ArchivosPersonal:
+    logger.debug(f'Actualizar id con los siguientes datos {datos.model_dump()}')
+
     registro = session.get(ArchivosPersonal,id)
 
-    if registro  is None:
-        raise NotFoundError(f"Archivo personal con id {id} no existe")
-    
+    if not registro:
+        raise NotFoundError('ArchivosPersonal', id)
+
     datos_registro = datos.model_dump(exclude_unset=True)   
     for campo, valor in datos_registro.items():
         setattr(registro, campo, valor)
     
     registro.updated_at = datetime.now()
     session.add(registro)
-    session.commit()
+    
+    try:
+        session.commit()
+    
+    except Exception:
+        logger.exception(f'No se pudo conectar a la base de datos')
+        raise DatabaseError('Fallo al conectarse a la base de datos')
+    
     session.refresh(registro)
+
+    logger.info(f'Actualizacion de archivos del persona con id {id} completado')
     return registro
 
-def delete(id:int, session:Session)-> bool:
-    registro = session.get(ArchivosPersonal,id)
 
-    if registro is None:
-        return False
-    
-    session.delete(registro)
-    session.commit()
+def delete(id: int, session: Session) -> bool:
+    logger.debug(f'Buscando id {id} de archivo_personal para borrarlo')
+
+    registro = session.get(ArchivosPersonal, id)
+    if not registro:
+        raise NotFoundError('ArchivosPersonal', id)
+
+    try:
+        session.delete(registro)
+        session.commit()
+    except Exception:
+        session.rollback()
+        logger.exception('Fallo en conexión con base de datos')
+        raise DatabaseError('Fallo en conexión con base de datos')
+
+    logger.info(f'ArchivoPersonal id {id} eliminado')
     return True
 
 
@@ -1673,54 +1640,93 @@ def delete(id:int, session:Session)-> bool:
 ```python
 from sqlmodel import Session, select
 from datetime import datetime
-import logging
+
 
 from app.schemas.archivo import ArchivoCreate, ArchivoRead
-from app.models.archivos import Archivos
+from app.models.archivos import Archivo
 
 
-logger = logging.getLogger(__name__)
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, DatabaseError
 
 
-def create(session: Session, datos:ArchivoCreate) -> ArchivoCreate:
-    archivo= Archivos(nombre=datos.nombre)
+def create(session: Session, datos:ArchivoCreate) -> Archivo:
+    logger.debug(f'Creando Nuevo archivo con {datos.model_dump()}')
+
+    archivo= Archivo(nombre=datos.nombre)
     session.add(archivo)
-    session.commit()
+
+    try:
+        session.commit()
+    except Exception:
+        logger.exception(f'Fallo conexion con la Base de Datos')
+        raise DatabaseError(f'Fallo comunicacion con Base de Datos')
+    
     session.refresh(archivo)
-    logger.info(f'logger.info(f"ArchivoPersonal creado con id {archivo.id}") ')
+    logger.info(f'Archivo creado con exito')
     return archivo
 
-def get_all(session: Session)-> ArchivoRead:
-    consulta = select(Archivos)
-    resultado = session.exec(consulta).all()
-    return resultado
+def get_all(session: Session)-> list[Archivo]:
+    logger.debug(f'Creando lista de todos los archivos')
+
+    try:
+        consulta = session.exec(select(Archivo)).all()
+
+    except Exception:
+        logger.exception(f'Fallo conexion con la Base de Datos')
+        raise DatabaseError(f'Fallo conexion con la Base de Datos')
+
+    return consulta
 
 
-def get_by_id(id: int, session: Session)->ArchivoRead:
-    return session.get(Archivos, id)
+def get_by_id(id: int, session: Session)->Archivo:
+    logger.debug(f'Buscando archivo con id {id}')
+
+    consulta = session.get(Archivo, id)
+
+    if not consulta:
+        raise NotFoundError("Archivo",id)
+    
+    return consulta
 
 
-def update(id:int, datos:ArchivoCreate, session:Session)->ArchivoRead | None:
-    archivo = session.get(Archivos, id)
+def update(id:int, datos:ArchivoCreate, session:Session)->Archivo:
+    logger.debug(f'Inicializando actualizacion del archivo con {datos.model_dump()}')
+    
+    archivo = session.get(Archivo, id)
 
-    if archivo is None:
-        return None
+    if not archivo:
+        raise NotFoundError('Archivo',id)
     
     archivo.nombre = datos.nombre
     archivo.updated_at = datetime.now()
     session.add(archivo)
-    session.commit()
+    
+    try:
+        session.commit()
+
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
     session.refresh(archivo)
     return archivo
 
 def delete(id: int, session: Session)-> bool:
-    archivo = session.get(Archivos, id)
+    logger.debug(f'Buscando archivo con el id{id} para borrar')
+    archivo = session.get(Archivo, id)
 
-    if archivo is None:
-        return False
+    if not archivo:
+        raise NotFoundError('Archivo',id)
     
-    session.delete(archivo)
-    session.commit()
+    try:
+        session.delete(archivo)
+        session.commit()
+
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
     return True
 ```
 
@@ -1732,45 +1738,95 @@ from datetime import datetime
 from app.models.banco import Banco
 from app.schemas.banco import BancoCreate
 
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, DatabaseError
 
-def crear_banco(session: Session, datos: BancoCreate) -> Banco:
-    # 1. Convertir el schema de entrada en un objeto de la tabla
+
+
+
+def create(session: Session, datos: BancoCreate) -> Banco:
+    logger.debug(f'Creando un nuevo Banco con {datos.model_dump()}')
     banco = Banco(nombre=datos.nombre)
-    session.add(banco)
-    session.commit()
-    session.refresh(banco)
+    
+    try:
+        session.add(banco)
+        session.commit()
 
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
+    session.refresh(banco)
+    logger.info(f'Banco {banco.nombre} creado exitosamente')
     return banco
 
 
-def listar_bancos(session: Session) -> list[Banco]:
-    # Construye y ejecuta un SELECT * FROM bancos
-    consulta = select(Banco)
-    resultados = session.exec(consulta).all()
-    return resultados
+def get_all(session: Session) -> list[Banco]:
+    logger.debug(f'Creando lista de todos los Bancos')
 
-def obtener_banco(session: Session, banco_id: int) -> Banco | None:
-    return session.get(Banco, banco_id)
+    try:
+        consulta = session.exec(select(Banco)).all()
 
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
+    return consulta
 
-def actualizar_banco(session: Session, banco_id: int, datos: BancoCreate) -> Banco | None:
-    banco = session.get(Banco, banco_id)
-    if banco is None:
-        return None
+def get_by_id(session: Session, id: int) -> Banco:
+    logger.debug(f'Buscando banco con id {id}')
+
+    try:
+        consulta = session.get(Banco, id)
+
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
+    if not consulta:
+        raise NotFoundError('Banco',id)
+
+    return consulta
+
+def update(session: Session, id: int, datos: BancoCreate) -> Banco:
+    logger.debug(f'Actualizando banco con los siguientes datos {datos.model_dump()}')
+
+    banco = session.get(Banco, id)
+    
+    if not banco:
+        raise NotFoundError('Banco',id)
+    
     banco.nombre = datos.nombre
     banco.updated_at = datetime.now()
     session.add(banco)
-    session.commit()
+
+    try:
+        session.commit()
+
+    except Exception:
+        logger.exception(f'Fallo conexion con base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+
     session.refresh(banco)
     return banco
 
 
-def eliminar_banco(session: Session, banco_id: int) -> bool:
-    banco = session.get(Banco, banco_id)
-    if banco is None:
-        return False
-    session.delete(banco)
-    session.commit()
+def delete(session: Session, id: int) -> bool:
+    logger.debug(f'Borrando banco con id {id}')
+    banco = session.get(Banco, id)
+
+
+    if not banco:
+        raise NotFoundError('Banco', id)
+    
+    try:
+        session.delete(banco)
+        session.commit()
+
+    except Exception:
+        logger.exception(f'Fallo conexion con base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
     return True
 ```
 
@@ -1783,42 +1839,82 @@ from datetime import datetime
 from app.models.ciudad import Ciudad
 from app.schemas.ciudad import CiudadCreate, CiudadRead
 
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError,AlreadyExistsError,DatabaseError, BussinesError
+
 def create(datos: CiudadCreate, session: Session) -> Ciudad:
+    logger.debug(f'Creando Ciudad nueva con {datos.model_dump()}')
     ciudad = Ciudad(nombre=datos.nombre)
     session.add(ciudad)
-    session.commit()
+
+    try:
+        session.commit()
+    
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
     session.refresh(ciudad)
+    logger.info(f'Creacion Exitosa de la ciudad {ciudad.nombre}')
+
     return ciudad
 
-def get_all(session:Session) -> list[CiudadRead]:
-    consulta = select(Ciudad)
-    resultado = session.exec(consulta).all()
+def get_all(session:Session) -> list[Ciudad]:
+    logger.debug(f'Creanod lista de todas las Ciudades')
+    
+    try:
+        resultado = session.exec(select(Ciudad)).all()
+
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
     return resultado
 
-def get_by_id(id: int, session:Session) -> CiudadRead:
-    return session.get(Ciudad, id)
+def get_by_id(id: int, session:Session) -> Ciudad:
+    logger.debug(f'Buscando ciudad con id {id}')
 
-def update(id: int, datos:CiudadCreate, session: Session) -> CiudadCreate:
+    consulta = session.get(Ciudad, id)
+
+    if not consulta:
+        raise NotFoundError('Ciudad',id)
+
+    return consulta
+
+def update(id: int, datos:CiudadCreate, session: Session) -> Ciudad:
+    logger.debug(f'Actualizando Ciudad con {datos.model_dump()}')
     ciudad = session.get(Ciudad, id)
 
-    if ciudad is None:
-        return None
+    if not ciudad:
+        raise NotFoundError('Ciudad',id)
     
     ciudad.nombre = datos.nombre
     ciudad.updated_at = datetime.now()
     session.add(ciudad)
-    session.commit()
-    session.refresh(ciudad)
+
+    try:
+        session.commit()
+        session.refresh(ciudad)
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
     return ciudad
 
 def delete(id:int, session:Session) -> bool:
+    logger.debug(f'Borrando Ciudad con el id {id}')
+
     ciudad = session.get(Ciudad, id)
     
     if not ciudad:
-        return False
+        raise NotFoundError('Ciudad',id)
     
-    session.delete(ciudad)
-    session.commit()
+    try:
+        session.delete(ciudad)
+        session.commit()
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
     return True
 
 ```
@@ -1831,14 +1927,15 @@ from sqlmodel import Session, select
 from app.models.dato_bancario import DatoBancario
 from app.models.banco import Banco
 from app.models.tipo_cuenta_bancaria import TipoCuentaBancaria
+from app.models.personal import Personal
 from app.schemas.dato_bancario import DatoBancarioCreate
 
 
 from app.utils.logger import logger
-from app.utils.errors import NotFoundError, AlreadyExistsError
+from app.utils.errors import NotFoundError, AlreadyExistsError, DatabaseError
 
 
-def crear(session: Session, data: DatoBancarioCreate) -> DatoBancario:
+def create(data: DatoBancarioCreate, session: Session) -> DatoBancario:
     logger.debug(f'Creando nueva relacion Dato bancario')
 
     banco = session.get(Banco, data.banco_id)
@@ -1848,34 +1945,65 @@ def crear(session: Session, data: DatoBancarioCreate) -> DatoBancario:
     tipo = session.get(TipoCuentaBancaria, data.tipo_cuenta_id)
     if not tipo:
         raise NotFoundError(f"El tipo de cuenta con id {data.tipo_cuenta_id} no existe")
+    
+    personal = session.get(Personal,id)
+    if not personal:
+        raise NotFoundError('Personal',data.personal_id)
 
     cuenta = DatoBancario(
         num_cuenta=data.num_cuenta,
         banco_id=data.banco_id,
         tipo_cuenta_id=data.tipo_cuenta_id,
+        personal_id=data.personal_id
     )
     session.add(cuenta)
-    session.commit()
+    
+    try:
+        session.commit()
+    except Exception as e:
+        logger.exception(f'Fallo al guardar Alimentacion en la Base de DAtos')
+        raise DatabaseError(f'No se pudo guardar el registro')
+
     session.refresh(cuenta)
     logger.info(f'Dato bancario creado existosamente {cuenta.model_dump()}')
     return cuenta
 
 
-def listar(session: Session) -> list[DatoBancario]:
+def get_all(session: Session) -> list[DatoBancario]:
+    logger.debug(f'Creando lista de todos los datos_bancarios')
+    consulta = session.exec(select(DatoBancario)).all()
 
-    return session.exec(select(DatoBancario)).all()
+    if not consulta:
+        raise NotFoundError('Dato Bancario', id)
+    
+    logger.info(f'Lista de Dato bancario creada')
+    return consulta
 
 
-def obtener(session: Session, cuenta_id: int) -> DatoBancario | None:
-    return session.get(DatoBancario, cuenta_id)
+def get_by_id(id: int, session: Session) -> DatoBancario | None:
+    logger.debug(f'Buscando datobancario con el id {id}')
+    consulta =  session.get(DatoBancario, id)
 
+    if not consulta:
+        raise NotFoundError('DatoBancario',id)
 
-def eliminar(session: Session, cuenta_id: int) -> bool:
-    cuenta = session.get(DatoBancario, cuenta_id)
+    return consulta
+
+def delete(id: int,session: Session) -> bool:
+    logger.debug(f'Buscando DatoBancario con id {id} para borrar')
+    cuenta = session.get(DatoBancario, id)
+    
     if not cuenta:
-        return False
-    session.delete(cuenta)
-    session.commit()
+        raise NotFoundError('Dato bancario',id)
+    
+    try:
+        session.delete(cuenta)
+        session.commit()
+
+    except Exception:
+        logger.exception(f'Fallo en la conexion a la base de datos')
+        raise DatabaseError(f'Fallo en la conexion a la base de datos')
+
     return True
 ```
 
@@ -1888,43 +2016,80 @@ from datetime import datetime
 from app.models.eps import Eps
 from app.schemas.eps import EpsCreate, EpsRead
 
-def create(datos:EpsCreate, session:Session) -> EpsCreate:
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, DatabaseError
+
+def create(datos:EpsCreate, session:Session) -> Eps:
+    logger.debug(f'Creando Nuevo Eps con {datos.model_dump()}')
     eps = Eps(nombre=datos.nombre)
     session.add(eps)
-    session.commit()
+
+    try:
+        session.commit()
+    except Exception:
+        logger.exception(f'Fallo en la comunicacion con la base de datos')
+        raise DatabaseError(f'Fallo en la comunicacion con la base de datos')
+    
     session.refresh(eps)
+    logger.info(f'Eps creada con exito')
     return eps
 
-def get_all(session:Session)->list[EpsRead]:
-    eps = select(Eps)
-    resultado = session.exec(eps).all()
-    return resultado
+def get_all(session:Session)->list[Eps]:
+    logger.debug(f'Creando listado con todas las eps')
+    
+    try:
+        consulta = session.exec(select(Eps)).all()
+    except Exception:
+        logger.exception(f'Falla conexion con la base de datos')
+        raise DatabaseError(f'Falla conexion con la base de datos')
+    
+    return consulta
 
-def get_by_id(id: int, session: Session) -> EpsRead:
-    return session.get(Eps, id)
+def get_by_id(id: int, session: Session) -> Eps:
+    logger.debug(f'Buscando eps por el id {id}')
+    consulta = session.get(Eps, id)
+    
+    if not consulta:
+        raise NotFoundError('Eps',id)
+    
+    return consulta
 
-def update(id: int, datos:EpsCreate, session:Session)->EpsRead:
+def update(id: int, datos:EpsCreate, session:Session)->Eps:
+    logger.debug(f'Actualizando la Eps con id {id} con datos {datos.model_dump()}')
     eps=session.get(Eps, id)
 
-    if eps is None:
-        return None
+    if not eps:
+        raise NotFoundError('Eps', id)
     
     eps.nombre = datos.nombre
     eps.updated_at = datetime.now()
     session.add(eps)
-    session.commit()
-    session.refresh(eps)
+
+    try:
+        session.commit()
+        session.refresh(eps)
+
+    except Exception:
+        logger.exception(f'Falla conexion con la Base de Datos')
+        raise DatabaseError(f'Falla conexion con la Base de Datos')
+
     return eps
 
 def delete(id: int, session:Session)->bool:
+    logger.debug(f'Buscando eps con el id{id} para borrar')
     eps=session.get(Eps,id)
-
-
-    if not eps:
-        return False
     
-    session.delete(eps)
-    session.commit()
+    if not eps:
+        raise NotFoundError('Eps',id)
+    
+    try:
+        session.delete(eps)
+        session.commit()
+    except Exception:
+        logger.exception(f'Falla conexion con la base de datos')
+        raise DatabaseError(f'Falla conexion con la base de datos')
+    
+    logger.info(f'Eps borrada exitosamente')
     return True
 ```
 
@@ -1937,43 +2102,75 @@ from datetime import datetime
 from app.schemas.genero import GeneroRead, GeneroCreate
 from app.models.genero import Genero
 
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, DatabaseError
 
-def create(datos: GeneroCreate, session: Session)-> GeneroCreate:
+def create(datos: GeneroCreate, session: Session)-> Genero:
+    logger.debug(f'Creando Genero')
     genero=Genero(nombre=datos.nombre)
     session.add(genero)
-    session.commit()
-    session.refresh(genero)
+
+    try:
+        session.commit()
+        session.refresh(genero)
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
+    logger.info(f'Genero creado con exito')
     return genero
 
-def get_all(session: Session)->list[GeneroRead]:
-    genero = select(Genero)
-    resultado = session.exec(genero).all()
-    return resultado
+def get_all(session: Session)->list[Genero]:
+    logger.debug(f'Creando listado de Generos')
+    consulta = session.exec(select(Genero)).all()
+    return consulta
 
-def get_by_id(id: int,session:Session)->GeneroRead:
-    return session.get(Genero, id)
+def get_by_id(id: int,session:Session)->Genero:
+    logger.debug(f'Buscando genero con id {id}')
+    consulta = session.get(Genero, id)
+
+    if not consulta:
+        raise NotFoundError('Genero',id)
+    
+    return consulta
 
 def update(id:int, datos:GeneroCreate, session:Session) -> GeneroRead:
+    logger.debug(f'Actualizando Genero con el id{id} y estos datos {datos.model_dump()}')
     genero = session.get(Genero, id)
 
-    if genero is None:
-        return None
+    if not genero:
+        raise NotFoundError('Genero', id)
     
     genero.nombre = datos.nombre
     genero.updated_at = datetime.now()
     session.add(genero)
-    session.commit()
-    session.refresh(genero)
+
+    try:
+        session.commit()
+        session.refresh(genero)
+
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+
+    logger.info(f'Genero con id {id} actualizado con exito')
     return genero
 
 def delete(id: int, session:Session):
+    logger.debug(f'Buscando genero con id {id} para borrar')
     genero = session.get(Genero, id)
 
-    if genero is None:
-        return None
+    if not genero:
+        raise NotFoundError('Genero',id)
     
-    session.delete(genero)
-    session.commit()
+    try:
+        session.delete(genero)
+        session.commit()
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+
+    logger.info(f'Genero Borrado con exito')
     return True
 
 ```
@@ -1989,8 +2186,11 @@ from app.utils.errors import NotFoundError
 from app.models import Personal, Genero, Alimentacion,Ciudad,Eps, StatusPersonal
 from app.schemas.personal import PersonalCreate, PersonalRead, PersonalUpdate
 
-def create(datos:PersonalCreate, session: Session)-> PersonalRead:
-    
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, DatabaseError
+
+def create(datos:PersonalCreate, session: Session)-> Personal:
+    logger.debug(f'Creando Personal Nuevo')    
     if not session.get(Genero,datos.genero_id):
         raise NotFoundError(f'El genero con el id {datos.genero_id} no existe')
     if not session.get(Alimentacion, datos.alimentacion_id):
@@ -2004,21 +2204,44 @@ def create(datos:PersonalCreate, session: Session)-> PersonalRead:
     
     new_person = Personal(**datos.model_dump())
     session.add(new_person)
-    session.commit()
-    session.refresh(new_person)
+
+    try:
+        session.commit()
+        session.refresh(new_person)
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
+    logger.info(f'Personal creado correctamente')
     return new_person
 
 def get_all(session: Session) -> list[Personal]:
-    return session.exec(select(Personal)).all()
+    logger.debug(f'Creando listado de todo el personal')
+    
+    try:
+        consulta = session.exec(select(Personal)).all()
+    except Exception:
+        logger.exception(f'Fallo conexxion con la base de datos')
+        raise DatabaseError(f'Fallo conexxion con la base de datos')
 
-def get_by_id(id:int, session:Session)->PersonalRead:
-    return session.get(Personal,id)
+    return consulta
 
-def update(id:int, datos:PersonalUpdate, session: Session)->PersonalUpdate:
+def get_by_id(id:int, session:Session)->Personal:
+    logger.debug(f'Buscando personal con id {id}')
+    consulta = session.get(Personal,id)
+
+    if not consulta:
+        raise NotFoundError('Personal',id)
+  
+    return consulta
+
+def update(id:int, datos:PersonalUpdate, session: Session)->Personal:
+    logger.debug(f'Actualizando personal con id {id}')
+    
     registro= session.get(Personal,id)
 
     if not registro:
-        return None
+        raise NotFoundError('Personal',id)
 
     # Validación si FK existen (Solo si fueron enviadas en la petición)
 
@@ -2037,6 +2260,7 @@ def update(id:int, datos:PersonalUpdate, session: Session)->PersonalUpdate:
     if datos.status_personal_id is not None and not session.get(StatusPersonal, datos.status_personal_id):
         raise NotFoundError(f"El status personal con el id {datos.status_personal_id} no existe")
 
+    
     datos_recibidos = datos.model_dump(exclude_unset=True)
     for key, value in datos_recibidos.items():
         setattr(registro, key, value)
@@ -2044,18 +2268,32 @@ def update(id:int, datos:PersonalUpdate, session: Session)->PersonalUpdate:
     
     registro.updated_at = datetime.now()
     session.add(registro)
-    session.commit()
-    session.refresh(registro)    
+    
+    try:
+        session.commit()
+        session.refresh(registro)
+    except Exception:
+        logger.exception(f'Falla conexion con la base de datos')
+        raise DatabaseError(f'Falla conexion con la base de datos')
+
+    logger.info(f'Personal actualizado con exito')
     return registro
 
 def delete(id: int, session:Session):
+    logger.debug(f'Buscando Personal con id {id} para borrar')
     registro = session.get(Personal, id)
 
     if not registro:
-        return False
+        raise NotFoundError('Personal', id)
     
-    session.delete(registro)
-    session.commit()
+    try:
+        session.delete(registro)
+        session.commit()
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+
+    logger.info(f'Personal borrado con exito')
     return True
 
 ```
@@ -2069,47 +2307,81 @@ from datetime import datetime
 from app.models.status_personal import StatusPersonal
 from app.schemas.status_personal import StatusPersonalCreate, StatusPersonalRead
 
-def create(datos: StatusPersonalCreate, session: Session) -> StatusPersonalRead:
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, DatabaseError
+
+def create(datos: StatusPersonalCreate, session: Session) -> StatusPersonal:
+    logger.debug(f'Creando Status personal con {datos.model_dump()}')
     status= StatusPersonal(nombre=datos.nombre)
     session.add(status)
-    session.commit()
-    session.refresh(status)
+
+    try:
+        session.commit()
+        session.refresh(status)
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
+    logger.info(f'Status Personal creado existosamente')
     return status
 
-def get_all(session: Session)->StatusPersonalRead:
-    status = select(StatusPersonal)
-    resultado = session.exec(status).all()
+def get_all(session: Session)->StatusPersonal:
+    logger.debug(f'Creando listado de Status de Personal')
+    
+    try:
+        resultado = session.exec(select(StatusPersonal)).all()
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
     return resultado
 
-def get_by_id(id: int, session: Session)-> StatusPersonalRead:
+def get_by_id(id: int, session: Session)-> StatusPersonal:
+    logger.debug(f'Buscando statuspersonal con id {id}')
     status = session.get(StatusPersonal, id)
 
-    if status is None:
-        return None
+    if not status:
+        raise NotFoundError("Status Personal", id)
     
     return status
 
-def update(id: int, datos: StatusPersonalCreate, session:Session)-> StatusPersonalRead:
+def update(id: int, datos: StatusPersonalCreate, session:Session)-> StatusPersonal:
+    logger.debug(f'Actualizando statusPersonal con id {id} con estos datos {datos}')
+
     status = session.get(StatusPersonal, id)
 
-    if status is None:
-        return None
+    if not status:
+        raise NotFoundError('Status Personal', id)
     
     status.nombre = datos.nombre
     status.updated_at = datetime.now()
     session.add(status)
-    session.commit()
-    session.refresh(status)
+
+    try:
+        session.commit()
+        session.refresh(status)
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
+    logger.info(f'StatusPersonal actualizado con existo')
     return status
 
 def delete(id: int, session:Session)-> bool:
+    logger.debug(f'Buscando statuspersonal con id {id} para borrar')
     status = session.get(StatusPersonal, id)
 
-    if status is None:
-        return False
+    if not status:
+        raise NotFoundError('Status Personal', id)
     
-    session.delete(status)
-    session.commit()
+    try:
+        session.delete(status)
+        session.commit()
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
+    logger.info(f'StatusPersonal borrado con exito')
     return True
 
 ```
@@ -2122,40 +2394,84 @@ from app.models.tipo_cuenta_bancaria import TipoCuentaBancaria
 from app.schemas.tipo_cuenta_bancaria import TipoCuentaCreate
 from datetime import datetime
 
-def crear(session: Session, data: TipoCuentaCreate) -> TipoCuentaBancaria:
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, DatabaseError
+
+def create(session: Session, data: TipoCuentaCreate) -> TipoCuentaBancaria:
+    logger.debug(f'Creando un nuevo tipo cuenta bancaria')
     tipo = TipoCuentaBancaria(nombre=data.nombre)
     session.add(tipo)
-    session.commit()
-    session.refresh(tipo)
+
+    try:
+        session.commit()
+        session.refresh(tipo)
+    except Exception:
+        logger.exception(f'Falla conexion con la base de datos')
+        raise DatabaseError(f'Falla conexion con la base de datos')
+    
+    logger.info(f'TipoCuentaBancaria creada con exito')
     return tipo
 
 
-def listar(session: Session) -> list[TipoCuentaBancaria]:
-    return session.exec(select(TipoCuentaBancaria)).all()
+def get_all(session: Session) -> list[TipoCuentaBancaria]:
+    logger.debug(f'Creando lista de todo los TiposCuentaBancaria')
+    
+    try:
+        consulta = session.exec(select(TipoCuentaBancaria)).all()
+    except Exception:
+        logger.exception(f'Falla conexion con base de datos')
+        raise DatabaseError(f'Falla conexion con la base de datos')
+
+    return consulta 
 
 
-def obtener(session: Session, tipo_id: int) -> TipoCuentaBancaria | None:
-    return session.get(TipoCuentaBancaria, tipo_id)
+def get_(id: int, session: Session) -> TipoCuentaBancaria:
+    logger.debug(f'Buscando TipoCuentaBancaria con id {id}')
+    consulta = session.get(TipoCuentaBancaria, id)
+
+    if not consulta:
+        raise NotFoundError('TipoCuenta Bancaria',id)
+    
+    return consulta 
 
 
-def actualizar(session: Session, tipo_id: int, data: TipoCuentaCreate) -> TipoCuentaBancaria | None:
-    tipo = session.get(TipoCuentaBancaria, tipo_id)
+def update(id: int, data: TipoCuentaCreate, session: Session) -> TipoCuentaBancaria:
+    logger.debug(f'Actualizando TipoCuentaBancaria con id {id} con datos {data.model_dump()}')
+    tipo = session.get(TipoCuentaBancaria, id)
+
     if not tipo:
-        return None
+        raise NotFoundError('TipoCuentaBancaria', id)
+    
     tipo.nombre = data.nombre
     tipo.updated_at = datetime.now()
     session.add(tipo)
-    session.commit()
-    session.refresh(tipo)
+    
+    try:
+        session.commit()
+        session.refresh(tipo)
+    except Exception:
+        logger.exception(f'Falla conexion con la base de datos')
+        raise DatabaseError(f'Falla conexion con la base de datos')
+    
+    logger.info(f'Actualizacion de TipoCuentaBancario existosa')
     return tipo
 
 
-def eliminar(session: Session, tipo_id: int) -> bool:
-    tipo = session.get(TipoCuentaBancaria, tipo_id)
+def delete(id: int, session: Session) -> bool:
+    logger.debug(f'Buscando TipoCuentaBancario con id {id} para borrar')
+    tipo = session.get(TipoCuentaBancaria, id)
+
     if not tipo:
-        return False
-    session.delete(tipo)
-    session.commit()
+        raise NotFoundError('TipoCuentaBancaria',id)
+    
+    try:
+        session.delete(tipo)
+        session.commit()
+    except Exception:
+        logger.exception(f'Falla conexion con la base de datos')
+        raise DatabaseError(f'Falla conexion con la base de datos')
+    
+    logger.info(f'TipoCuentaBancaria borrada con exito')
     return True
 
 
@@ -2172,10 +2488,10 @@ def eliminar(session: Session, tipo_id: int) -> bool:
 ```python
 
 class NotFoundError(Exception):
-    def __init__(self,entity:str, id: int = None):
+    def __init__(self, entity: str, id: int | None = None):
         self.id = id
         self.entity = entity
-        message = f'El {entity.name} con el id {id} no se encontro' if id else f'ID {id} no existe'
+        message = f'{entity} con id {id} no encontrado' if id is not None else f'{entity} no encontrado'
         super().__init__(message)
 
 class AlreadyExistsError(Exception):
@@ -2188,7 +2504,7 @@ class AlreadyExistsError(Exception):
 
 class BussinesError(Exception):
     def __init__(self, message: str):
-        super().__init__(message) 
+        super().__init__(message)
 
 class DatabaseError(Exception):
     def __init__(self, message: str):
@@ -2260,14 +2576,14 @@ logger.remove()
 
 logger.add(
     sys.stdout,
-    format= '<level>{time:YYYY:MM:DD}</level> | <level>{level:<8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | <cyan>{message}</cyan>',
+    format= '<level>{time:YYYY-MM-DD}</level> | <level>{level:<8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | <cyan>{message}</cyan>',
     level= 'DEBUG',
     colorize= True
 )
 
 logger.add(
     'logs/app.logs',
-    format= '{time:YYYY:MM:DD HH:mm:ss} | {level:<8} | {name}:{function}:{line} | {message}',
+    format= '{time:YYYY-MM-DD HH:mm:ss} | {level:<8} | {name}:{function}:{line} | {message}',
     level= 'INFO',
     rotation='1 day',
     retention='7 days',

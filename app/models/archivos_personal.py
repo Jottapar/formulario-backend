@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .personal import Personal
-    from .archivos import Archivos
+    from .archivos import Archivo
 
 class ArchivosPersonal(SQLModel, table=True):
     __tablename__= "archivos_personal"
     __table_args__= (
-        UniqueConstraint("personal_id","archivos_id", name="uq_persona_tipo"),
+        UniqueConstraint("personal_id","archivos_id", name="uq_personal_archivos"),
     )
 
     id: int | None = Field(default=None, primary_key=True)
@@ -22,4 +22,4 @@ class ArchivosPersonal(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.now)
 
     personal: "Personal" = Relationship(back_populates="archivos_personal")
-    archivos: "Archivos" = Relationship(back_populates="archivos_personal")
+    archivos: "Archivo" = Relationship(back_populates="archivos_personal")

@@ -1,51 +1,90 @@
 from sqlmodel import Session, select
 from datetime import datetime
-import logging
+
 
 from app.schemas.archivo import ArchivoCreate, ArchivoRead
-from app.models.archivos import Archivos
+from app.models.archivos import Archivo
 
 
-logger = logging.getLogger(__name__)
+from app.utils.logger import logger
+from app.utils.errors import NotFoundError, DatabaseError
 
 
-def create(session: Session, datos:ArchivoCreate) -> ArchivoCreate:
-    archivo= Archivos(nombre=datos.nombre)
+def create(session: Session, datos:ArchivoCreate) -> Archivo:
+    logger.debug(f'Creando Nuevo archivo con {datos.model_dump()}')
+
+    archivo= Archivo(nombre=datos.nombre)
     session.add(archivo)
-    session.commit()
+
+    try:
+        session.commit()
+    except Exception:
+        logger.exception(f'Fallo conexion con la Base de Datos')
+        raise DatabaseError(f'Fallo comunicacion con Base de Datos')
+    
     session.refresh(archivo)
-    logger.info(f'logger.info(f"ArchivoPersonal creado con id {archivo.id}") ')
+    logger.info(f'Archivo creado con exito')
     return archivo
 
-def get_all(session: Session)-> ArchivoRead:
-    consulta = select(Archivos)
-    resultado = session.exec(consulta).all()
-    return resultado
+def get_all(session: Session)-> list[Archivo]:
+    logger.debug(f'Creando lista de todos los archivos')
+
+    try:
+        consulta = session.exec(select(Archivo)).all()
+
+    except Exception:
+        logger.exception(f'Fallo conexion con la Base de Datos')
+        raise DatabaseError(f'Fallo conexion con la Base de Datos')
+
+    return consulta
 
 
-def get_by_id(id: int, session: Session)->ArchivoRead:
-    return session.get(Archivos, id)
+def get_by_id(id: int, session: Session)->Archivo:
+    logger.debug(f'Buscando archivo con id {id}')
+
+    consulta = session.get(Archivo, id)
+
+    if not consulta:
+        raise NotFoundError("Archivo",id)
+    
+    return consulta
 
 
-def update(id:int, datos:ArchivoCreate, session:Session)->ArchivoRead | None:
-    archivo = session.get(Archivos, id)
+def update(id:int, datos:ArchivoCreate, session:Session)->Archivo:
+    logger.debug(f'Inicializando actualizacion del archivo con {datos.model_dump()}')
+    
+    archivo = session.get(Archivo, id)
 
-    if archivo is None:
-        return None
+    if not archivo:
+        raise NotFoundError('Archivo',id)
     
     archivo.nombre = datos.nombre
     archivo.updated_at = datetime.now()
     session.add(archivo)
-    session.commit()
+    
+    try:
+        session.commit()
+
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
     session.refresh(archivo)
     return archivo
 
 def delete(id: int, session: Session)-> bool:
-    archivo = session.get(Archivos, id)
+    logger.debug(f'Buscando archivo con el id{id} para borrar')
+    archivo = session.get(Archivo, id)
 
-    if archivo is None:
-        return False
+    if not archivo:
+        raise NotFoundError('Archivo',id)
     
-    session.delete(archivo)
-    session.commit()
+    try:
+        session.delete(archivo)
+        session.commit()
+
+    except Exception:
+        logger.exception(f'Fallo conexion con la base de datos')
+        raise DatabaseError(f'Fallo conexion con la base de datos')
+    
     return True

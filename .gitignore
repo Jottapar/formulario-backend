@@ -26,5 +26,6 @@ __pycache__/
 htmlcov/
 
 # --- Logs y bases de datos locales sueltas ---
+logs/
 *.log
 *.sqlite3

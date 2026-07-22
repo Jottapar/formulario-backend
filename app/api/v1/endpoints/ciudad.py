@@ -17,25 +17,12 @@ def get_all(session: Session = Depends(get_session)) -> list[CiudadRead]:
 
 @router.get("/{id}", response_model=CiudadRead)
 def get_by_id(id: int, session: Session = Depends(get_session)) -> CiudadRead:
-    ciudad = services.get_by_id(id, session)
-
-    if ciudad is None:
-        raise HTTPException(status_code=404, detail='Ciudad no encontrada')
-    return ciudad
+    return services.get_by_id(id, session)
 
 @router.put("/{id}", response_model=CiudadRead)
 def update(id:int, datos:CiudadCreate, session: Session = Depends(get_session)) -> CiudadRead:
-    ciudad =services.update(id, datos, session)
-
-    if ciudad is None:
-        raise HTTPException(status_code=404, detail='Ciudad no encontrada')
-    
-    return ciudad
+    return services.update(id, datos, session)
 
 @router.delete("/{id}",status_code=status.HTTP_204_NO_CONTENT)
 def delete(id:int, session: Session = Depends(get_session)):
-    ciudad = services.delete(id, session)
-
-    if not ciudad:
-        raise HTTPException(status_code=404, detail='Ciudad no encontrada')
-    
+    services.delete(id, session)

@@ -27,7 +27,6 @@ class Personal(SQLModel, table=True):
     telefono: str
     fecha_nacimiento: date
     correo: EmailStr
-    ciudad: str
     direccion: str = Field(max_length=100)
     nombre_emergencia: str
     telefono_emergencia: str

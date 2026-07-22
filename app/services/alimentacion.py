@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 from datetime import datetime
 from app.models.alimentacion import Alimentacion
-from app.schemas.alimentacion import AlimentacionCreate, AlimentacionRead
+from app.schemas.alimentacion import AlimentacionCreate
 
 from app.utils.logger import logger
 from app.utils.errors import NotFoundError, AlreadyExistsError, BussinesError, DatabaseError
@@ -16,12 +16,12 @@ def create(session:Session, datos: AlimentacionCreate) -> Alimentacion:
     try:
         session.commit()
 
-    except IntegrityError as e:
+    except IntegrityError:
         session.rollback()
         logger.warning(f'Intento de crear alimentacion duplicada: {datos.nombre}')
         raise AlreadyExistsError("Alimentacion", "nombre", datos.nombre)
     
-    except Exception as e:
+    except Exception:
         session.rollback()
         logger.exception('Fallo inesperado al guardar Alimentacion')
         raise DatabaseError("No se pudo guardar el registro")
@@ -36,6 +36,7 @@ def get_all(session:Session) -> list[Alimentacion]:
     
     try:
         resultados = session.exec(consulta).all()
+
     except Exception:
         logger.exception(f'No se pudo conectar a la BD')
         raise DatabaseError(f'No se pudo conectar a la BD')

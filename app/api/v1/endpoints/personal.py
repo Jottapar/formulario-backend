@@ -18,25 +18,12 @@ def get_all(session: Session = Depends(get_session))-> list[PersonalCreate]:
 
 @router.get("/{id}", response_model=PersonalRead)
 def get_by_id(id:int, session: Session = Depends(get_session))-> PersonalRead:
-    registro= services.get_by_id(id, session)
-
-    if registro is None:
-        raise HTTPException(status_code=404, detail='Persona no existe')
-    
-    return registro
+    return services.get_by_id(id, session)
 
 @router.patch("/{id}", response_model=PersonalRead, status_code=status.HTTP_200_OK)
 def update(id: int, datos:PersonalUpdate, session: Session = Depends(get_session))->PersonalRead:
-    registro = services.update(id, datos, session)
-
-    if registro is None:
-        raise HTTPException(status_code=404, detail='La persona no existe')
-    
-    return registro
+    return services.update(id, datos, session)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id:int, session:Session=Depends(get_session)):
-    registro = services.delete(id, session)
-
-    if not registro:
-        raise HTTPException(status_code=404, detail='Persona no existe')   
+    services.delete(id, session)

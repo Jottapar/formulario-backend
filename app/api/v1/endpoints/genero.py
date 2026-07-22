@@ -17,26 +17,13 @@ def get_all(session: Session = Depends(get_session))->list[GeneroRead]:
 
 @router.get("/{id}", response_model=GeneroRead, status_code=status.HTTP_200_OK)
 def get_by_id(id: int, session: Session = Depends(get_session))-> GeneroRead:
-    genero = services.get_by_id(id, session)
-
-    if genero is None:
-        raise HTTPException(status_code=404, detail='Este genero no se encontro')
-    
-    return genero
+    return services.get_by_id(id, session)
 
 @router.put("/{id}", response_model=GeneroRead)
 def update(id:int, datos: GeneroCreate, session: Session=Depends(get_session))-> GeneroRead:
-    genero = services.update(id, datos, session)
-
-    if genero is None:
-        raise HTTPException(status_code=404, detail='Genero no encontrado')
-    
-    return genero
+    return services.update(id, datos, session)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id:int, session: Session = Depends(get_session)):
-    genero = services.delete(id, session)
+    services.delete(id, session)
 
-    if not genero:
-        raise HTTPException(status_code=404,detail='Genero no encontrado')
-    

@@ -18,25 +18,12 @@ def get_all(session: Session = Depends(get_session))->list[EpsRead]:
 
 @router.get("/{id}", response_model=EpsRead,status_code=status.HTTP_200_OK)
 def get_by_id(id:int, session:Session=Depends(get_session))->EpsRead:
-    eps=services.get_by_id(id, session)
-
-    if eps is None:
-        raise HTTPException(status_code=404, detail='Eps no encontrada')
-    
-    return eps
+    return services.get_by_id(id, session)
 
 @router.put("/{id}", response_model=EpsRead)
 def update(id:int, datos:EpsCreate, session:Session = Depends(get_session)) -> EpsRead :
-    eps = services.update(id,datos,session)
-
-    if eps is None:
-        raise HTTPException(id, datos, session)
-    
-    return eps
+    return services.update(id,datos,session)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id:int, session:Session = Depends(get_session)):
-    eps = services.delete(id,session)
-
-    if not eps:
-        raise HTTPException(status_code=404, detail='Eps no encontrada')
+    services.delete(id,session)
